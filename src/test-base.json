@@ -1,0 +1,21 @@
+{
+  "testcases": [
+    {
+      "testName": "yjs-circle-add",
+      "login": {
+        "username": "admin",
+        "password": "password"
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [{ "id": "019cdb22-a9d6-742a-92a5-59b8f04150c6" }],
+        "description": "「svg add test」 canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecase": {
+        "usecase-id": "circle-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する"
+      }
+    }
+  ]
+}

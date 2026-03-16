@@ -1,0 +1,29 @@
+{
+  "transitions": [
+    {
+      "pageurl": "/login",
+      "pageName": "ログイン画面",
+      "data-testid": "page-login"
+    },
+    {
+      "pageurl": "/example/canvas",
+      "pageName": "Canvas 一覧画面",
+      "data-testid": "page-canvas-list"
+    },
+    {
+      "pageurl": "/example/canvas/new",
+      "pageName": "Canvas 編集画面",
+      "data-testid": "page-canvas-editor"
+    },
+    {
+      "pageurl": "/example/canvas-yjs",
+      "pageName": "Yjs Canvas 一覧画面",
+      "data-testid": "page-canvas-yjs-list"
+    },
+    {
+      "pageurl": "/example/canvas-yjs/:id",
+      "pageName": "Yjs Canvas 編集画面",
+      "data-testid": "page-canvas-yjs-editor"
+    }
+  ]
+}

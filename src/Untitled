@@ -1,0 +1,8 @@
+| 画面            | URL                                      | data-testid            |
+| :-------------- | :--------------------------------------- | :--------------------- |
+| ログイン        | /login                                   | page-login             |
+| Canvas 一覧     | /example/canvas                          | page-canvas-list       |
+| Canvas 編集     | /example/canvas/new, /example/canvas/:id | page-canvas-editor     |
+| Yjs Canvas 一覧 | /example/canvas-yjs                      | page-canvas-yjs-list   |
+| Yjs Canvas 編集 | /example/canvas-yjs/:id                  | page-canvas-yjs-editor |
+|                 |                                          |                        |
