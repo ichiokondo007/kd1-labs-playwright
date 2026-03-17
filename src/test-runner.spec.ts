@@ -19,6 +19,6 @@ for (const tc of testBase.testcases) {
 
     // 3. ユースケース実行
     const usecase = loadUsecase(tc.usecase['usecase-id']);
-    await usecase(page);
+    await usecase(page, tc.usecase.params);
   });
 }

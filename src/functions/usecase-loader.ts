@@ -1,7 +1,10 @@
 import type { Page } from '@playwright/test';
 import circleAdd from '../usecase/canvas-yjs/circle-add';
 
-export type UsecaseFunction = (page: Page) => Promise<void>;
+export type UsecaseFunction = (
+  page: Page,
+  params?: Record<string, unknown>,
+) => Promise<void>;
 
 const usecaseMap: Record<string, UsecaseFunction> = {
   'circle-add': circleAdd,

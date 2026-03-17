@@ -4,7 +4,11 @@ import type { Page } from '@playwright/test';
 export interface LoginParams {
   username: string;
   password: string;
+  /** ログイン完了（Dashboard Home 表示）を待つタイムアウト（ミリ秒）。未指定時は 5000 */
+  timeoutMs?: number;
 }
+
+const DEFAULT_LOGIN_TIMEOUT_MS = 5000;
 
 /**
  * ログイン画面でフォーム入力・送信し、Dashboard Home 表示まで待つ。
@@ -14,11 +18,13 @@ export async function login(
   page: Page,
   params: LoginParams,
 ): Promise<void> {
-  const { username, password } = params;
+  const { username, password, timeoutMs = DEFAULT_LOGIN_TIMEOUT_MS } = params;
 
   await page.locator('input[name="userName"]').fill(username);
   await page.locator('input[name="password"]').fill(password);
   await page.getByRole('button', { name: 'Login' }).click();
 
-  await page.getByRole('heading', { name: 'Dashboard Home', level: 1 }).waitFor({ state: 'visible', timeout: 5000 });
+  await page
+    .getByRole('heading', { name: 'Dashboard Home', level: 1 })
+    .waitFor({ state: 'visible', timeout: timeoutMs });
 }

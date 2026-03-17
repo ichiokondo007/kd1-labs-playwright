@@ -7,6 +7,10 @@ export default defineConfig({
   testDir: './src',
   timeout: Number(process.env.TIMEOUT) || 30000,
   fullyParallel: true,
+  /** 並列 worker 数。未設定時は Playwright のデフォルト（おおよそ CPU コア数）。例: PLAYWRIGHT_WORKERS=4 */
+  workers: process.env.PLAYWRIGHT_WORKERS
+    ? Number(process.env.PLAYWRIGHT_WORKERS)
+    : undefined,
   retries: 0,
   reporter: 'html',
   use: {
