@@ -10,7 +10,7 @@
       },
       "transitions": {
         "pageurl": "/example/canvas-yjs/:id",
-        "params": [{ "id": "019cf755-8caa-73a9-b95a-827589505e77" }],
+        "params": [{ "id": "019cfa0b-715d-776e-a960-4631c63104b0" }],
         "description": "「svg add test」 canvas編集画面に遷移する",
         "data-testid": "page-canvas-yjs-editor"
       },

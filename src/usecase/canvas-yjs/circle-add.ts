@@ -9,20 +9,32 @@ export interface CircleAddParams {
   waitMs?: number;
 }
 
+const INTERVAL_MS = 5000;
+const CIRCLE_COUNT = 5;
+const Y_STEP = 50;
+
 /**
- * yjs collab canvas画面で Circle ツールを選択し、canvas の指定座標をクリックして円を追加する。
- * params で座標 (x, y) と末尾の待機時間 waitMs を指定可能。
+ * yjs collab canvas画面で Circle ツールを選択し、canvas 上に 5 つの円を追加する。
+ * 5 秒間隔で 1 つずつ追加。X は params.x のまま、Y は 1 つごとに +50（y, y+50, y+100, y+150, y+200）。
+ * params で開始座標 (x, y) と末尾の待機時間 waitMs を指定可能。
  */
 export default async function circleAdd(
   page: Page,
   params?: CircleAddParams,
 ): Promise<void> {
-  const { x = DEFAULT_CLICK_POSITION.x, y = DEFAULT_CLICK_POSITION.y } = params ?? {};
+  const { x = DEFAULT_CLICK_POSITION.x, y = DEFAULT_CLICK_POSITION.y } =
+    params ?? {};
 
-  await page.getByRole('button', { name: 'Circle' }).click();
-
+  const circleButton = page.getByRole('button', { name: 'Circle' });
   const canvas = page.locator('canvas.upper-canvas');
-  await canvas.click({ position: { x, y } });
+
+  for (let i = 0; i < CIRCLE_COUNT; i++) {
+    await circleButton.click();
+    await canvas.click({ position: { x, y: y + i * Y_STEP } });
+    if (i < CIRCLE_COUNT - 1) {
+      await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
+    }
+  }
 
   // 動作確認用: テスト終了前にブラウザを開いたまま待機する（headed 実行時など）
   const waitMs =
