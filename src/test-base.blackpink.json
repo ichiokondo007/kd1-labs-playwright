@@ -1,10 +1,10 @@
 {
-  "_purpose": "5人でCRDT 同時ログイン・メモリ確認用。複数ユーザーが並列で同一キャンバスにログインし circle を追加する。同時ログイン時の負荷を想定し、全 testcase で login.timeoutMs を多めに設定している。",
+  "_purpose": "5人でCRDT 同時ログイン・メモリ確認用。複数ユーザーが並列で同一キャンバスにログインし rect を追加する。同時ログイン時の負荷を想定し、全 testcase で login.timeoutMs を多めに設定している。",
   "testcases": [
     {
-      "testName": "yjs-circle-add-1",
+      "testName": "yjs-rect-add-blackpink-01",
       "login": {
-        "username": "ichio",
+        "username": "jeni",
         "password": "password",
         "timeoutMs": 20000
       },
@@ -19,19 +19,19 @@
         "data-testid": "page-canvas-yjs-editor"
       },
       "usecase": {
-        "usecase-id": "circle-add",
-        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "usecase-id": "rect-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを作成する",
         "params": {
           "x": 150,
           "y": 10
         },
-        "params-description": "circleを作成する座標"
+        "params-description": "rectを作成する座標"
       }
     },
     {
-      "testName": "yjs-circle-add-2",
+      "testName": "yjs-rect-add-blackpink-02",
       "login": {
-        "username": "nao",
+        "username": "risa",
         "password": "password",
         "timeoutMs": 20000
       },
@@ -46,19 +46,46 @@
         "data-testid": "page-canvas-yjs-editor"
       },
       "usecase": {
-        "usecase-id": "circle-add",
-        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "usecase-id": "rect-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを作成する",
+        "params": {
+          "x": 200,
+          "y": 10
+        },
+        "params-description": "rectを作成する座標"
+      }
+    },
+    {
+      "testName": "yjs-rect-add-blackpink-03",
+      "login": {
+        "username": "roze",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
+          }
+        ],
+        "description": "「svg add test」 canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecase": {
+        "usecase-id": "rect-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを作成する",
         "params": {
           "x": 250,
-          "y": 10
+          "y": 20
         },
-        "params-description": "circleを作成する座標"
+        "params-description": "rectを作成する座標"
       }
     },
     {
-      "testName": "yjs-circle-add-3",
+      "testName": "yjs-rect-add-blackpink-04",
       "login": {
-        "username": "ryota",
+        "username": "jisu",
         "password": "password",
         "timeoutMs": 20000
       },
@@ -73,19 +100,19 @@
         "data-testid": "page-canvas-yjs-editor"
       },
       "usecase": {
-        "usecase-id": "circle-add",
-        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "usecase-id": "rect-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを作成する",
         "params": {
           "x": 350,
-          "y": 10
+          "y": 40
         },
-        "params-description": "circleを作成する座標"
+        "params-description": "rectを作成する座標"
       }
     },
     {
-      "testName": "yjs-circle-add-4",
+      "testName": "yjs-rect-add-blackpink-05",
       "login": {
-        "username": "yuko",
+        "username": "blackpink",
         "password": "password",
         "timeoutMs": 20000
       },
@@ -100,40 +127,13 @@
         "data-testid": "page-canvas-yjs-editor"
       },
       "usecase": {
-        "usecase-id": "circle-add",
-        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "usecase-id": "rect-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを作成する",
         "params": {
-          "x": 450,
-          "y": 10
+          "x": 400,
+          "y": 50
         },
-        "params-description": "circleを作成する座標"
-      }
-    },
-    {
-      "testName": "yjs-circle-add-5",
-      "login": {
-        "username": "GD",
-        "password": "password",
-        "timeoutMs": 20000
-      },
-      "transitions": {
-        "pageurl": "/example/canvas-yjs/:id",
-        "params": [
-          {
-            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
-          }
-        ],
-        "description": "「svg add test」 canvas編集画面に遷移する",
-        "data-testid": "page-canvas-yjs-editor"
-      },
-      "usecase": {
-        "usecase-id": "circle-add",
-        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
-        "params": {
-          "x": 550,
-          "y": 10
-        },
-        "params-description": "circleを作成する座標"
+        "params-description": "rectを作成する座標"
       }
     }
   ]

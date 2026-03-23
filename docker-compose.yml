@@ -1,0 +1,34 @@
+services:
+  allure:
+    image: "frankescobar/allure-docker-service"
+    container_name: kd1-allure-service
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      # テスト結果ディレクトリの自動チェック間隔（秒）
+      # ローカル開発時: 数秒に設定すると自動でレポート再生成
+      # CI利用時: NONE に設定し、API経由でレポート生成
+      CHECK_RESULTS_EVERY_SECONDS: 3
+      # 履歴の保持を有効化（これが履歴管理のキー設定）
+      KEEP_HISTORY: 1
+      # 保持する履歴の最大件数
+      KEEP_HISTORY_LATEST: 25
+    ports:
+      - "5050:5050"
+    volumes:
+      # Playwrightのallure-resultsディレクトリをマウント
+      # ※ パスはプロジェクト構成に合わせて調整してください
+      - ./allure-results:/app/allure-results
+      - kd1-allure-reports:/app/default-reports
+
+  allure-ui:
+    image: "frankescobar/allure-docker-service-ui"
+    container_name: kd1-allure-ui
+    environment:
+      # allure-service の API URL
+      ALLURE_DOCKER_PUBLIC_API_URL: "http://localhost:5050"
+      ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ""
+    ports:
+      - "5252:5252"
+
+volumes:
+  kd1-allure-reports:

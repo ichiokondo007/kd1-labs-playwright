@@ -13,8 +13,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
+    "@kd1-labs/devtool-cli": "github:ichiokondo007/devtool-cli",
     "@playwright/test": "^1.58.2",
     "@types/node": "^22.19.15",
+    "allure-playwright": "^3.6.0",
     "dotenv": "^17.3.1"
   }
 }

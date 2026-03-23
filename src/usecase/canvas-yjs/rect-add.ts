@@ -3,13 +3,13 @@ import type { Page } from '@playwright/test';
 /** canvas 上でクリックする座標（要素左上からの相対）。未指定時はデフォルト値 */
 const DEFAULT_CLICK_POSITION = { x: 100, y: 10 };
 
-export interface CircleAddParams {
+export interface RectAddParams {
   x?: number;
   y?: number;
 }
 
 const INTERVAL_MS = 3000;
-const CIRCLE_COUNT = 10;
+const RECT_COUNT = 10;
 const Y_STEP = 50;
 
 /**
@@ -19,18 +19,18 @@ const Y_STEP = 50;
  */
 export default async function circleAdd(
   page: Page,
-  params?: CircleAddParams,
+  params?: RectAddParams,
 ): Promise<void> {
   const { x = DEFAULT_CLICK_POSITION.x, y = DEFAULT_CLICK_POSITION.y } =
     params ?? {};
 
-  const circleButton = page.getByRole('button', { name: 'Circle' });
+  const rectButton = page.getByRole('button', { name: 'Rect' });
   const canvas = page.locator('canvas.upper-canvas');
 
-  for (let i = 0; i < CIRCLE_COUNT; i++) {
-    await circleButton.click();
+  for (let i = 0; i < RECT_COUNT; i++) {
+    await rectButton.click();
     await canvas.click({ position: { x, y: y + i * Y_STEP } });
-    if (i < CIRCLE_COUNT - 1) {
+    if (i < RECT_COUNT - 1) {
       await new Promise((resolve) => setTimeout(resolve, INTERVAL_MS));
     }
   }

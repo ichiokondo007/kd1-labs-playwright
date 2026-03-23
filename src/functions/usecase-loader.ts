@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
 import circleAdd from '../usecase/canvas-yjs/circle-add';
+import rectAdd from '../usecase/canvas-yjs/rect-add';
 
 export type UsecaseFunction = (
   page: Page,
@@ -8,6 +9,7 @@ export type UsecaseFunction = (
 
 const usecaseMap: Record<string, UsecaseFunction> = {
   'circle-add': circleAdd,
+  'rect-add': rectAdd,
 };
 
 /**

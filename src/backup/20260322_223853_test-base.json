@@ -1,8 +1,31 @@
 {
-  "_purpose": "5人でCRDT 同時ログイン・メモリ確認用。複数ユーザーが並列で同一キャンバスにログインし circle を追加する。同時ログイン時の負荷を想定し、全 testcase で login.timeoutMs を多めに設定している。",
+  "_purpose": "CRDT 同時ログイン・メモリ確認用。複数ユーザーが並列で同一キャンバスにログインし circle を追加する。同時ログイン時の負荷を想定し、全 testcase で login.timeoutMs を多めに設定している。",
   "testcases": [
     {
-      "testName": "yjs-circle-add-1",
+      "testName": "yjs-circle-add-admin",
+      "login": {
+        "username": "admin",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
+        "description": "「svg add test」 canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecase": {
+        "usecase-id": "circle-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "params": {
+          "x": 50,
+          "y": 10
+        },
+        "params-description": "circleを作成する座標"
+      }
+    },
+    {
+      "testName": "yjs-circle-add-2",
       "login": {
         "username": "ichio",
         "password": "password",
@@ -10,11 +33,7 @@
       },
       "transitions": {
         "pageurl": "/example/canvas-yjs/:id",
-        "params": [
-          {
-            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
-          }
-        ],
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
         "description": "「svg add test」 canvas編集画面に遷移する",
         "data-testid": "page-canvas-yjs-editor"
       },
@@ -29,7 +48,7 @@
       }
     },
     {
-      "testName": "yjs-circle-add-2",
+      "testName": "yjs-circle-add-3",
       "login": {
         "username": "nao",
         "password": "password",
@@ -37,11 +56,7 @@
       },
       "transitions": {
         "pageurl": "/example/canvas-yjs/:id",
-        "params": [
-          {
-            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
-          }
-        ],
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
         "description": "「svg add test」 canvas編集画面に遷移する",
         "data-testid": "page-canvas-yjs-editor"
       },
@@ -56,7 +71,7 @@
       }
     },
     {
-      "testName": "yjs-circle-add-3",
+      "testName": "yjs-circle-add-4",
       "login": {
         "username": "ryota",
         "password": "password",
@@ -64,11 +79,7 @@
       },
       "transitions": {
         "pageurl": "/example/canvas-yjs/:id",
-        "params": [
-          {
-            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
-          }
-        ],
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
         "description": "「svg add test」 canvas編集画面に遷移する",
         "data-testid": "page-canvas-yjs-editor"
       },
@@ -83,19 +94,15 @@
       }
     },
     {
-      "testName": "yjs-circle-add-4",
+      "testName": "yjs-circle-add-5",
       "login": {
-        "username": "yuko",
+        "username": "risa",
         "password": "password",
         "timeoutMs": 20000
       },
       "transitions": {
         "pageurl": "/example/canvas-yjs/:id",
-        "params": [
-          {
-            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
-          }
-        ],
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
         "description": "「svg add test」 canvas編集画面に遷移する",
         "data-testid": "page-canvas-yjs-editor"
       },
@@ -110,19 +117,15 @@
       }
     },
     {
-      "testName": "yjs-circle-add-5",
+      "testName": "yjs-circle-add-6",
       "login": {
-        "username": "GD",
+        "username": "jini",
         "password": "password",
         "timeoutMs": 20000
       },
       "transitions": {
         "pageurl": "/example/canvas-yjs/:id",
-        "params": [
-          {
-            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
-          }
-        ],
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
         "description": "「svg add test」 canvas編集画面に遷移する",
         "data-testid": "page-canvas-yjs-editor"
       },
@@ -130,7 +133,53 @@
         "usecase-id": "circle-add",
         "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
         "params": {
-          "x": 550,
+          "x": 450,
+          "y": 10
+        },
+        "params-description": "circleを作成する座標"
+      }
+    },
+    {
+      "testName": "yjs-circle-add-7",
+      "login": {
+        "username": "roze",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
+        "description": "「svg add test」 canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecase": {
+        "usecase-id": "circle-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "params": {
+          "x": 450,
+          "y": 10
+        },
+        "params-description": "circleを作成する座標"
+      }
+    },
+    {
+      "testName": "yjs-circle-add-8",
+      "login": {
+        "username": "gd",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [{ "id": "019cffa3-774c-7116-84f5-3e6df9cb9d49" }],
+        "description": "「svg add test」 canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecase": {
+        "usecase-id": "circle-add",
+        "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+        "params": {
+          "x": 450,
           "y": 10
         },
         "params-description": "circleを作成する座標"

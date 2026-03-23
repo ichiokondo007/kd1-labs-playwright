@@ -1,3 +1,4 @@
+
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
@@ -11,10 +12,7 @@ export default defineConfig({
     ? Number(process.env.PLAYWRIGHT_WORKERS)
     : undefined,
   retries: 0,
-  reporter: [
-    ['html'],
-    ['allure-playwright', { outputFolder: './allure-results' }],
-  ],
+  reporter: 'html',
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     headless: process.env.HEADLESS !== 'false',
