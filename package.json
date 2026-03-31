@@ -9,7 +9,8 @@
     "test:e2e:headed": "pnpm --filter @kd1-labs/e2e test:headed",
     "test:e2e:list": "pnpm --filter @kd1-labs/e2e exec playwright test --list",
     "typecheck": "tsc --build",
-    "scheduler": "pnpm --filter @kd1-labs/e2e scheduler"
+    "scheduler": "pnpm --filter @kd1-labs/e2e scheduler",
+    "cli": "npx navmenu ./cli/navmenu.json"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +18,8 @@
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
     "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@kd1-labs/navmenu-cli": "^0.1.0"
   }
 }

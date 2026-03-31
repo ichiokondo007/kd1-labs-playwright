@@ -1,0 +1,333 @@
+# @kd1-labs/navmenu-cli
+
+[![npm version](https://img.shields.io/npm/v/@kd1-labs/navmenu-cli.svg)](https://www.npmjs.com/package/@kd1-labs/navmenu-cli)
+[![Node.js](https://img.shields.io/node/v/@kd1-labs/navmenu-cli.svg)](https://nodejs.org/)
+
+開発ツール向けの対話型 CLI フレームワークです。[Inquirer](https://github.com/SBoudrias/Inquirer.js) をベースとしたライブラリです。JSON定義で、ネスト可能なサブメニュー・パンくず・i18nを備えた、インタラクティブなCLI構築が可能な為、DEVTOOL等に工数をかけず構築可能です。
+
+## 要件
+
+- **Node.js 20 以上**（`package.json` の `engines` と同じ）
+
+## インストール
+
+```bash
+npm install @kd1-labs/navmenu-cli
+```
+
+```bash
+pnpm add @kd1-labs/navmenu-cli
+```
+
+```bash
+yarn add @kd1-labs/navmenu-cli
+```
+
+## クイックスタート（JSON）
+
+プロジェクトに `navmenu.json` を置き、次で起動できます（パス省略時はカレントの `./navmenu.json`）。
+
+```bash
+npx navmenu
+# または
+npx navmenu ./path/to/navmenu.json
+```
+
+## リポジトリ・サンプル
+
+- **モノレポ（開発・Issue）**: [navmenu-project](https://github.com/kd1-labs/navmenu-project)
+- **完全な JSON サンプル**: `[examples/basic](https://github.com/kd1-labs/navmenu-project/tree/main/examples/basic)`（`navmenu.json` と実行手順はリポジトリ README を参照）
+
+npm 未公開のソースから試す場合は、[リポジトリをクローン](https://github.com/kd1-labs/navmenu-project)してルート README の手順に従ってください（`pnpm install` → `pnpm build` など）。
+
+## Usage — TypeScript（ハンドラ）
+
+```typescript
+#!/usr/bin/env node
+import {
+  createCli,
+  runStep,
+  runSequential,
+  runForeground,
+  createLogger,
+  defaultTheme,
+  waitForEnter,
+} from "@kd1-labs/navmenu-cli";
+
+const log = createLogger(defaultTheme);
+
+createCli({
+  theme: defaultTheme,
+  banner: "MY PROJECT",
+  title: "My Project DevTool",
+  menus: [
+    {
+      name: "Run Playwright Tests",
+      value: "test",
+      handler: async () => {
+        runStep({ label: "Playwright", cmd: "pnpm exec playwright test" });
+        await waitForEnter();
+      },
+    },
+    {
+      name: "Dev Server",
+      value: "dev",
+      handler: async () => {
+        await runForeground({ label: "Dev Server", cmd: "pnpm run dev" });
+      },
+    },
+  ],
+});
+```
+
+## Usage — JSON（ハンドラなし）
+
+メニューを JSON で定義し、アクションは `command` / `menu` / `confirm` / `table` など。パンくずは `TOP > Submenu` のように表示され、ネスト時は **戻る** / **TOPへ** が自動で入ります。
+
+```bash
+npx navmenu ./navmenu.json
+```
+
+```typescript
+import { fileURLToPath } from "node:url";
+import { createCliFromConfigFile } from "@kd1-labs/navmenu-cli";
+
+await createCliFromConfigFile(
+  fileURLToPath(new URL("./navmenu.json", import.meta.url)),
+);
+```
+
+## バナー・テーマ（DI）
+
+`ThemeProvider` と `BannerRenderer` を実装または継承し、`createCli` / `createCliFromNavConfig` に渡します。
+
+- **ThemeProvider**: パレット（info / success / warn / error）と `formatBreadcrumb(segments)`
+- **BannerRenderer**: `print(banner?, bannerColor?)`
+
+### banner 設定形式（JSON）
+
+`banner` は後方互換ありで次の 3 形式を利用できます。
+
+1. 文字列（後方互換）
+2. `type: "text"`（`figlet` でリアルタイム ASCII 変換）
+3. `type: "file"`（ファイル内容をそのまま表示）
+
+```json
+{
+  "banner": "Example CLI"
+}
+```
+
+```json
+{
+  "banner": {
+    "type": "text",
+    "text": "Example CLI"
+  }
+}
+```
+
+```json
+{
+  "banner": {
+    "type": "file",
+    "path": "./banner.txt"
+  }
+}
+```
+
+`type: "file"` の `path` は、`navmenu.json` ファイルの配置ディレクトリからの相対パスで解決されます。
+
+### 画面ヘッダー（`screen`）
+
+バナー直下の罫線とタイトル行を JSON で変えられます。`titleTemplate` の `{title}` が現在のメニュータイトルに置換されます。
+
+- `border` — 上下に同じ 1 行を出力。省略時は従来の長い `─` 行。**空文字 `""`** なら罫線を出しません。
+- `titleTemplate` — 省略時は `【{title}】`。
+
+```json
+{
+  "screen": {
+    "border": "============================================================",
+    "titleTemplate": ">> {title}"
+  }
+}
+```
+
+### バナー色（`bannerColor`）
+
+バナー文字色に、次の**名前**のいずれか、または任意の ANSI エスケープ列を指定できます。名前は大文字・小文字を区別しません。
+
+- `blue`, `cyan`, `orange`, `green`, `red`, `gray`, `reset`
+
+名前はマージ後のパレットを参照します（`colors` で `blue` を変えたうえで `bannerColor` を `"blue"` にした場合、その上書き後の色になります）。
+
+```json
+{
+  "bannerColor": "orange"
+}
+```
+
+任意の ANSI エスケープ列をそのまま渡すこともできます（例: `"\u001b[38;5;208m"`）。
+
+### 色（`colors`）
+
+`blue` / `cyan` / `orange` / `green` / `red` / `gray` / `reset` を省略可能な部分上書きとして指定します（未指定キーはパッケージ既定の ANSI）。**バナー以外**のテーマ（ログ・パンくずなど）にも使われます。各値は上記と同じ**名前**か、任意の ANSI エスケープ列です。
+
+```json
+{
+  "colors": {
+    "blue": "orange",
+    "cyan": "\u001b[38;5;45m"
+  }
+}
+```
+
+`createCliFromConfigFile` / `createCliFromNavConfig` の **`theme` オプション**を渡した場合は、JSON の `colors` は**無視**されます（明示 DI が優先）。
+
+### 言語（`locale` / `messageOverrides`）
+
+- `locale`: `"ja"`（既定）または `"en"` でバンドル済みメッセージを切り替え。
+- `messageOverrides`: 文字列フィールドを個別に上書き。`stepsCompleted` だけテンプレート文字列で、`{total}` を置換します。
+
+ナビゲーションの「戻る」「TOP」「終了」の文言は、従来どおり **`labels`** で指定した場合が **`messageOverrides` より優先**されます。
+
+**API からの上書き**: 第 2 引数の `messages` / `theme` は、上記 JSON の `locale`・`messageOverrides`・`colors` より**常に優先**されます。
+
+```json
+{
+  "locale": "en",
+  "messageOverrides": {
+    "pressEnterToReturn": "Press Enter to continue...",
+    "stepsCompleted": "Done {total} steps."
+  }
+}
+```
+
+ハンドラベースの `createCli` でも、同様に `screen` と `colors`（`theme` 未指定時のみ反映）を `CliConfig` で指定できます。
+
+## エクスポート一覧
+
+### Core
+
+
+| Export                           | 説明                                |
+| -------------------------------- | ----------------------------------- |
+| `createCli(config)`              | ハンドラベースの対話 CLI            |
+| `createCliFromNavConfig(config)` | パース済み `NavMenuConfig` から実行 |
+| `createCliFromConfigFile(path)`  | JSON ファイルを読み込んで実行       |
+| `parseNavMenuConfigJson(json)`   | JSON 文字列のパースと検証           |
+| `assertNavMenuRefs(config)`      | `menuId` 参照の検証                 |
+
+
+### Runner / UI
+
+
+| Export                                        | 説明                               |
+| --------------------------------------------- | ---------------------------------- |
+| `runStep`, `runSequential`, `runForeground`   | シェル実行ヘルパー                 |
+| `runCommand`                                  | stdout/stderr を取得する非同期実行 |
+| `createLogger(theme)`                         | テーマ付きログ                     |
+| `printTable`, `waitForEnter`, `showScreen`, … | UI ヘルパー                        |
+
+
+### I18n
+
+| Export                     | 説明                                                         |
+| -------------------------- | ------------------------------------------------------------ |
+| `jaMessages`               | 日本語メッセージ（デフォルト）                               |
+| `enMessages`               | 英語メッセージ                                               |
+| `defaultMessages`          | デフォルトメッセージ（`jaMessages` と同じ）                  |
+| `resolveMessagesForNavConfig` | `locale` + `messageOverrides` から `Messages` を組み立て |
+| `messageOverridesSchema`   | Zod スキーマ（検証用）                                       |
+| `NavMenuMessageOverrides`  | JSON `messageOverrides` の型                                 |
+| `Messages`                 | メッセージの型定義                                           |
+
+### テーマ / 色
+
+| Export                      | 説明                                      |
+| --------------------------- | ----------------------------------------- |
+| `defaultColorPalette`       | 既定 ANSI パレット                        |
+| `mergeColorPalette`         | 部分上書きマージ                          |
+| `createThemeFromPalette`    | `ColorPalette` から `ThemeProvider` 生成  |
+| `createThemeFromPartialColors` | 部分 `ColorPalette` からテーマ生成   |
+| `createDefaultBannerRenderer` | パレットを渡すバナーレンダラー生成    |
+| `resolveColorToken`         | 1 値を名前または ANSI として解決       |
+| `resolveBannerColorToken`   | `bannerColor` 用（未指定はそのまま）   |
+| `resolvePartialColors`      | `colors` オブジェクトの値を解決        |
+
+### 型
+
+`Step`, `MenuDefinition`, `CliConfig`, `CliScreenLayout`, `ColorPalette`, `NavMenuConfig`, `NavMenuAction`, `ThemeProvider`, `BannerRenderer`, `BannerConfig`, `Messages` など。
+
+## 国際化（i18n）
+
+デフォルトの UI メッセージは日本語です。英語や他の言語に切り替えるには、`messages` オプションを渡します。
+
+### ハンドラベース（`createCli`）
+
+```typescript
+import { createCli, enMessages } from "@kd1-labs/navmenu-cli";
+
+createCli({
+  banner: "MY PROJECT",
+  menus: [/* ... */],
+  messages: enMessages,
+});
+```
+
+### JSON ドリブン（`createCliFromNavConfig` / `createCliFromConfigFile`）
+
+```typescript
+import { createCliFromConfigFile, enMessages } from "@kd1-labs/navmenu-cli";
+
+await createCliFromConfigFile("./navmenu.json", {
+  messages: enMessages,
+});
+```
+
+`navmenu.json` 内の `locale` / `messageOverrides` でも切り替え可能です（上記「画面・色・言語」参照）。**`messages` オプションを渡した場合は JSON より優先**されます。
+
+### カスタムメッセージ
+
+`Messages` インターフェースを実装して独自の言語に対応できます。
+
+```typescript
+import type { Messages } from "@kd1-labs/navmenu-cli";
+
+const frMessages: Messages = {
+  stepsCompleted: (total) => `✅ ${total} étapes terminées`,
+  ctrlCToStop: "(Ctrl+C pour arrêter)",
+  back: "◀ Retour",
+  top: "⏫ Haut",
+  exit: "❌ Quitter",
+  errorOccurred: "\n⚠ Une erreur est survenue.\n",
+  errorReturnToTop: "\n⚠ Une erreur est survenue. Retour au menu principal.\n",
+  pressEnterToReturn: "Appuyez sur Entrée pour revenir...",
+};
+```
+
+## CLI バイナリ
+
+`package.json` の `bin` で `navmenu` を公開しています。インストール後:
+
+```bash
+navmenu path/to/navmenu.json
+```
+
+引数を省略すると、カレントディレクトリの `./navmenu.json` を使います。
+
+## 開発者向け（モノレポ）
+
+このパッケージは [navmenu-project](https://github.com/kd1-labs/navmenu-project) 内で開発されています。クローン後のビルド・サンプル・公開手順は **リポジトリ直下の [README.md](https://github.com/kd1-labs/navmenu-project/blob/main/README.md)** を参照してください。
+
+```bash
+# リポジトリルートで
+pnpm install
+pnpm build
+pnpm --filter @kd1-labs/navmenu-cli run typecheck
+```
+
+## ライセンス
+
+MIT

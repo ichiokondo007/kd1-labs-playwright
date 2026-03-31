@@ -1,0 +1,556 @@
+import { z } from 'zod';
+import { ExecSyncOptions } from 'node:child_process';
+import * as ora from 'ora';
+
+type NavMenuAction = {
+    type: "command";
+    mode: "once";
+    cmd: string;
+    label?: string;
+} | {
+    type: "command";
+    mode: "sequential";
+    steps: {
+        label: string;
+        cmd: string;
+    }[];
+} | {
+    type: "command";
+    mode: "foreground";
+    cmd: string;
+    label?: string;
+} | {
+    type: "menu";
+    menuId: string;
+} | {
+    type: "table";
+    headers: string[];
+    rows: string[][];
+} | {
+    type: "confirm";
+    message: string;
+    onYes: NavMenuAction;
+    onNo?: NavMenuAction;
+};
+declare const messageOverridesSchema: z.ZodObject<{
+    stepsCompleted: z.ZodOptional<z.ZodString>;
+    ctrlCToStop: z.ZodOptional<z.ZodString>;
+    back: z.ZodOptional<z.ZodString>;
+    top: z.ZodOptional<z.ZodString>;
+    exit: z.ZodOptional<z.ZodString>;
+    errorOccurred: z.ZodOptional<z.ZodString>;
+    errorReturnToTop: z.ZodOptional<z.ZodString>;
+    pressEnterToReturn: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    stepsCompleted?: string | undefined;
+    ctrlCToStop?: string | undefined;
+    back?: string | undefined;
+    top?: string | undefined;
+    exit?: string | undefined;
+    errorOccurred?: string | undefined;
+    errorReturnToTop?: string | undefined;
+    pressEnterToReturn?: string | undefined;
+}, {
+    stepsCompleted?: string | undefined;
+    ctrlCToStop?: string | undefined;
+    back?: string | undefined;
+    top?: string | undefined;
+    exit?: string | undefined;
+    errorOccurred?: string | undefined;
+    errorReturnToTop?: string | undefined;
+    pressEnterToReturn?: string | undefined;
+}>;
+type NavMenuMessageOverrides = z.infer<typeof messageOverridesSchema>;
+declare const navMenuConfigSchema: z.ZodObject<{
+    rootMenuId: z.ZodString;
+    menus: z.ZodRecord<z.ZodString, z.ZodObject<{
+        label: z.ZodString;
+        description: z.ZodOptional<z.ZodString>;
+        items: z.ZodArray<z.ZodType<{
+            label: string;
+            description?: string;
+            action: NavMenuAction;
+        }, z.ZodTypeDef, {
+            label: string;
+            description?: string;
+            action: NavMenuAction;
+        }>, "many">;
+    }, "strip", z.ZodTypeAny, {
+        label: string;
+        items: {
+            label: string;
+            description?: string;
+            action: NavMenuAction;
+        }[];
+        description?: string | undefined;
+    }, {
+        label: string;
+        items: {
+            label: string;
+            description?: string;
+            action: NavMenuAction;
+        }[];
+        description?: string | undefined;
+    }>>;
+    title: z.ZodOptional<z.ZodString>;
+    screen: z.ZodOptional<z.ZodObject<{
+        border: z.ZodOptional<z.ZodString>;
+        titleTemplate: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        border?: string | undefined;
+        titleTemplate?: string | undefined;
+    }, {
+        border?: string | undefined;
+        titleTemplate?: string | undefined;
+    }>>;
+    colors: z.ZodOptional<z.ZodObject<{
+        blue: z.ZodOptional<z.ZodString>;
+        cyan: z.ZodOptional<z.ZodString>;
+        orange: z.ZodOptional<z.ZodString>;
+        green: z.ZodOptional<z.ZodString>;
+        red: z.ZodOptional<z.ZodString>;
+        gray: z.ZodOptional<z.ZodString>;
+        reset: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        blue?: string | undefined;
+        cyan?: string | undefined;
+        orange?: string | undefined;
+        green?: string | undefined;
+        red?: string | undefined;
+        gray?: string | undefined;
+        reset?: string | undefined;
+    }, {
+        blue?: string | undefined;
+        cyan?: string | undefined;
+        orange?: string | undefined;
+        green?: string | undefined;
+        red?: string | undefined;
+        gray?: string | undefined;
+        reset?: string | undefined;
+    }>>;
+    locale: z.ZodOptional<z.ZodEnum<["ja", "en"]>>;
+    messageOverrides: z.ZodOptional<z.ZodObject<{
+        stepsCompleted: z.ZodOptional<z.ZodString>;
+        ctrlCToStop: z.ZodOptional<z.ZodString>;
+        back: z.ZodOptional<z.ZodString>;
+        top: z.ZodOptional<z.ZodString>;
+        exit: z.ZodOptional<z.ZodString>;
+        errorOccurred: z.ZodOptional<z.ZodString>;
+        errorReturnToTop: z.ZodOptional<z.ZodString>;
+        pressEnterToReturn: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        stepsCompleted?: string | undefined;
+        ctrlCToStop?: string | undefined;
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+        errorOccurred?: string | undefined;
+        errorReturnToTop?: string | undefined;
+        pressEnterToReturn?: string | undefined;
+    }, {
+        stepsCompleted?: string | undefined;
+        ctrlCToStop?: string | undefined;
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+        errorOccurred?: string | undefined;
+        errorReturnToTop?: string | undefined;
+        pressEnterToReturn?: string | undefined;
+    }>>;
+    banner: z.ZodOptional<z.ZodUnion<[z.ZodString, z.ZodObject<{
+        type: z.ZodLiteral<"text">;
+        text: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        type: "text";
+        text: string;
+    }, {
+        type: "text";
+        text: string;
+    }>, z.ZodObject<{
+        type: z.ZodLiteral<"file">;
+        path: z.ZodString;
+    }, "strip", z.ZodTypeAny, {
+        path: string;
+        type: "file";
+    }, {
+        path: string;
+        type: "file";
+    }>]>>;
+    bannerColor: z.ZodOptional<z.ZodString>;
+    labels: z.ZodOptional<z.ZodObject<{
+        back: z.ZodOptional<z.ZodString>;
+        top: z.ZodOptional<z.ZodString>;
+        exit: z.ZodOptional<z.ZodString>;
+    }, "strip", z.ZodTypeAny, {
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+    }, {
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+    }>>;
+}, "strip", z.ZodTypeAny, {
+    rootMenuId: string;
+    menus: Record<string, {
+        label: string;
+        items: {
+            label: string;
+            description?: string;
+            action: NavMenuAction;
+        }[];
+        description?: string | undefined;
+    }>;
+    title?: string | undefined;
+    screen?: {
+        border?: string | undefined;
+        titleTemplate?: string | undefined;
+    } | undefined;
+    colors?: {
+        blue?: string | undefined;
+        cyan?: string | undefined;
+        orange?: string | undefined;
+        green?: string | undefined;
+        red?: string | undefined;
+        gray?: string | undefined;
+        reset?: string | undefined;
+    } | undefined;
+    locale?: "ja" | "en" | undefined;
+    messageOverrides?: {
+        stepsCompleted?: string | undefined;
+        ctrlCToStop?: string | undefined;
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+        errorOccurred?: string | undefined;
+        errorReturnToTop?: string | undefined;
+        pressEnterToReturn?: string | undefined;
+    } | undefined;
+    banner?: string | {
+        type: "text";
+        text: string;
+    } | {
+        path: string;
+        type: "file";
+    } | undefined;
+    bannerColor?: string | undefined;
+    labels?: {
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+    } | undefined;
+}, {
+    rootMenuId: string;
+    menus: Record<string, {
+        label: string;
+        items: {
+            label: string;
+            description?: string;
+            action: NavMenuAction;
+        }[];
+        description?: string | undefined;
+    }>;
+    title?: string | undefined;
+    screen?: {
+        border?: string | undefined;
+        titleTemplate?: string | undefined;
+    } | undefined;
+    colors?: {
+        blue?: string | undefined;
+        cyan?: string | undefined;
+        orange?: string | undefined;
+        green?: string | undefined;
+        red?: string | undefined;
+        gray?: string | undefined;
+        reset?: string | undefined;
+    } | undefined;
+    locale?: "ja" | "en" | undefined;
+    messageOverrides?: {
+        stepsCompleted?: string | undefined;
+        ctrlCToStop?: string | undefined;
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+        errorOccurred?: string | undefined;
+        errorReturnToTop?: string | undefined;
+        pressEnterToReturn?: string | undefined;
+    } | undefined;
+    banner?: string | {
+        type: "text";
+        text: string;
+    } | {
+        path: string;
+        type: "file";
+    } | undefined;
+    bannerColor?: string | undefined;
+    labels?: {
+        back?: string | undefined;
+        top?: string | undefined;
+        exit?: string | undefined;
+    } | undefined;
+}>;
+type NavMenuConfig = z.infer<typeof navMenuConfigSchema>;
+declare function parseNavMenuConfigUnknown(data: unknown): NavMenuConfig;
+declare function parseNavMenuConfigJson(json: string): NavMenuConfig;
+/** Ensures every `menuId` reference exists and `rootMenuId` is present. */
+declare function assertNavMenuRefs(config: NavMenuConfig): void;
+
+interface Messages {
+    /** e.g. "✅ 3 ステップ完了" */
+    stepsCompleted: (total: number) => string;
+    /** e.g. "(Ctrl+C で停止)" */
+    ctrlCToStop: string;
+    /** Navigation: back label */
+    back: string;
+    /** Navigation: top label */
+    top: string;
+    /** Navigation: exit label */
+    exit: string;
+    /** Error shown inside JSON-driven CLI */
+    errorOccurred: string;
+    /** Error shown inside handler-based CLI */
+    errorReturnToTop: string;
+    /** Pause prompt */
+    pressEnterToReturn: string;
+}
+declare const jaMessages: Messages;
+declare const enMessages: Messages;
+/** Default messages (Japanese for backward compatibility) */
+declare const defaultMessages: Messages;
+/**
+ * Base messages from `locale`, then apply JSON `messageOverrides`.
+ * Does not apply `config.labels` (handled at call site).
+ */
+declare function resolveMessagesForNavConfig(locale: "ja" | "en" | undefined, overrides: NavMenuMessageOverrides | undefined): Messages;
+
+type ColorPalette = {
+    blue: string;
+    cyan: string;
+    orange: string;
+    green: string;
+    red: string;
+    gray: string;
+    reset: string;
+};
+declare const defaultColorPalette: ColorPalette;
+/** Same as `defaultColorPalette` — kept for backward compatibility. */
+declare const color: ColorPalette;
+declare function mergeColorPalette(partial?: Partial<ColorPalette>): ColorPalette;
+
+/**
+ * Renders the CLI banner. Override in consuming projects if needed.
+ */
+interface BannerRenderer {
+    print(banner?: BannerConfig | (() => void), bannerColor?: string): void;
+}
+declare function createDefaultBannerRenderer(colorPalette?: ColorPalette): BannerRenderer;
+declare const defaultBannerRenderer: BannerRenderer;
+
+/** ANSI palette used by `createLogger` and pause prompts. */
+interface ThemePalette {
+    info: string;
+    success: string;
+    warn: string;
+    error: string;
+    /** Muted text (e.g. pause hint). Defaults to gray if omitted. */
+    muted?: string;
+    reset: string;
+}
+/**
+ * Theme for logs and breadcrumb formatting.
+ * Implement in consuming projects for custom colors / separators.
+ */
+interface ThemeProvider {
+    readonly palette: ThemePalette;
+    formatBreadcrumb(segments: string[]): string;
+}
+declare function createThemeFromPalette(palette: ColorPalette): ThemeProvider;
+declare const defaultTheme: ThemeProvider;
+/**
+ * Merge partial ANSI overrides into the default palette and build a theme.
+ */
+declare function createThemeFromPartialColors(partial?: Partial<ColorPalette>): ThemeProvider;
+
+/** Optional screen header below the banner (`border` empty string skips rule lines). */
+interface CliScreenLayout {
+    border?: string;
+    titleTemplate?: string;
+}
+interface Step {
+    label: string;
+    cmd: string;
+}
+interface MenuEntry {
+    name: string;
+    value: string;
+    description?: string;
+}
+interface MenuDefinition {
+    name: string;
+    value: string;
+    description?: string;
+    handler: () => Promise<void>;
+}
+type BannerTextConfig = {
+    type: "text";
+    text: string;
+};
+type BannerFileConfig = {
+    type: "file";
+    path: string;
+    /**
+     * Resolved banner contents. Filled internally after loading config file.
+     */
+    content?: string;
+};
+type BannerConfig = string | BannerTextConfig | BannerFileConfig;
+interface CliConfig {
+    /** ASCII art banner setting or a function that prints custom banner */
+    banner?: BannerConfig | (() => void);
+    /** Title shown below the banner (default: "Main Menu") */
+    title?: string;
+    /** Menu definitions for the CLI */
+    menus: MenuDefinition[];
+    /** Banner color (ANSI escape code). Defaults to blue. */
+    bannerColor?: string;
+    /** Optional screen border / title template (`{title}`). */
+    screen?: CliScreenLayout;
+    /**
+     * Partial ANSI palette (merged with defaults). Ignored if `theme` is set.
+     */
+    colors?: Partial<ColorPalette>;
+    /** Optional theme for logs / breadcrumb (JSON CLI uses this too). */
+    theme?: ThemeProvider;
+    /** Optional banner renderer (DI for tests or custom art). */
+    bannerRenderer?: BannerRenderer;
+    /** Optional i18n messages (defaults to Japanese). */
+    messages?: Messages;
+}
+
+/**
+ * Create and start an interactive CLI with the given configuration.
+ *
+ * Usage:
+ * ```ts
+ * createCli({
+ *   banner: "MY PROJECT",
+ *   title: "My DevTool",
+ *   menus: [
+ *     { name: "Run tests", value: "test", handler: async () => { ... } },
+ *   ],
+ * });
+ * ```
+ */
+declare function createCli(config: CliConfig): Promise<void>;
+
+interface CreateCliFromNavConfigOptions {
+    theme?: ThemeProvider;
+    bannerRenderer?: BannerRenderer;
+    resolvedBanner?: BannerConfig;
+    messages?: Messages;
+}
+/**
+ * Interactive CLI from a validated {@link NavMenuConfig} (JSON-driven menus).
+ */
+declare function createCliFromNavConfig(config: NavMenuConfig, options?: CreateCliFromNavConfigOptions): Promise<void>;
+/**
+ * Load a JSON file and start the nav CLI.
+ */
+declare function createCliFromConfigFile(filePath: string, options?: CreateCliFromNavConfigOptions): Promise<void>;
+
+/** 単一ステップを実行（ラベル + コマンド表示） */
+declare function runStep(step: Step, opts?: ExecSyncOptions): void;
+/** 複数ステップを直列実行（進捗番号付き、1つ失敗で中断） */
+declare function runSequential(steps: Step[], opts?: ExecSyncOptions & {
+    messages?: Messages;
+}): void;
+/**
+ * フォアグラウンドでコマンドを実行し、終了まで待機する。
+ * Ctrl+C (SIGINT) で子プロセスを停止してから resolve する。
+ * dev server のような長時間プロセス向け。
+ */
+declare function runForeground(step: Step, options?: {
+    messages?: Messages;
+}): Promise<number | null>;
+
+interface CommandResult {
+    stdout: string;
+    stderr: string;
+}
+interface CommandOptions {
+    cwd?: string;
+    env?: NodeJS.ProcessEnv;
+}
+declare function runCommand(command: string, args: string[], cwdOrOpts?: string | CommandOptions): Promise<CommandResult>;
+
+/**
+ * Resolves a single color value: preset name (case-insensitive) uses `palette`,
+ * otherwise the string is returned as-is (e.g. raw ANSI).
+ */
+declare function resolveColorToken(value: string, palette: ColorPalette): string;
+/**
+ * Resolves `colors` partial: each value may be a preset name (resolved with
+ * {@link defaultColorPalette}) or a raw ANSI string.
+ */
+declare function resolvePartialColors(partial: Partial<ColorPalette> | undefined): Partial<ColorPalette> | undefined;
+/**
+ * Resolves banner color: preset name uses merged palette slot, undefined stays undefined.
+ */
+declare function resolveBannerColorToken(token: string | undefined, palette: ColorPalette): string | undefined;
+
+declare function createLogger(theme: ThemeProvider): {
+    readonly info: (msg: string) => void;
+    readonly success: (msg: string) => void;
+    readonly warn: (msg: string) => void;
+    readonly error: (msg: string) => void;
+};
+type Logger = ReturnType<typeof createLogger>;
+/** Default logger using `defaultTheme`. */
+declare const log: {
+    readonly info: (msg: string) => void;
+    readonly success: (msg: string) => void;
+    readonly warn: (msg: string) => void;
+    readonly error: (msg: string) => void;
+};
+
+declare function createSpinner(text: string): ora.Ora;
+
+interface WaitForEnterStyle {
+    muted: string;
+    reset: string;
+}
+declare function waitForEnter(message?: string, style?: WaitForEnterStyle): Promise<void>;
+
+declare function printTable(headers: string[], rows: string[][]): void;
+
+/**
+ * Print a banner to the console.
+ * @param banner - Custom ASCII art string, a print function, or undefined for default
+ * @param bannerColor - ANSI color code (defaults to blue)
+ */
+declare function printBanner(banner?: BannerConfig | (() => void), bannerColor?: string, colorPalette?: ColorPalette): void;
+
+interface ShowScreenOptions {
+    banner?: BannerConfig | (() => void);
+    bannerColor?: string;
+    /** Pre-formatted breadcrumb line (e.g. `TOP > Docker`). */
+    breadcrumb?: string;
+    bannerRenderer?: BannerRenderer;
+    /** Title area: border lines and `{title}` placeholder in `titleTemplate`. */
+    screen?: CliScreenLayout;
+}
+declare function showScreen(title?: string, options?: ShowScreenOptions): void;
+
+/** select メニューの初期表示行数（これを超えるとスクロール）。全メニュー共通。 */
+declare const SELECT_PAGE_SIZE = 10;
+/** select メニュー共通テーマ。選択行を反転表示で目立たせる。 */
+declare const SELECT_THEME: {
+    readonly icon: {
+        readonly cursor: "▶";
+    };
+    readonly style: {
+        readonly highlight: (text: string) => string;
+    };
+};
+
+export { type BannerConfig, type BannerFileConfig, type BannerRenderer, type BannerTextConfig, type CliConfig, type CliScreenLayout, type ColorPalette, type CommandOptions, type CommandResult, type CreateCliFromNavConfigOptions, type Logger, type MenuDefinition, type MenuEntry, type Messages, type NavMenuAction, type NavMenuConfig, type NavMenuMessageOverrides, SELECT_PAGE_SIZE, SELECT_THEME, type ShowScreenOptions, type Step, type ThemePalette, type ThemeProvider, type WaitForEnterStyle, assertNavMenuRefs, color, createCli, createCliFromConfigFile, createCliFromNavConfig, createDefaultBannerRenderer, createLogger, createSpinner, createThemeFromPalette, createThemeFromPartialColors, defaultBannerRenderer, defaultColorPalette, defaultMessages, defaultTheme, enMessages, jaMessages, log, mergeColorPalette, messageOverridesSchema, navMenuConfigSchema, parseNavMenuConfigJson, parseNavMenuConfigUnknown, printBanner, printTable, resolveBannerColorToken, resolveColorToken, resolveMessagesForNavConfig, resolvePartialColors, runCommand, runForeground, runSequential, runStep, showScreen, waitForEnter };

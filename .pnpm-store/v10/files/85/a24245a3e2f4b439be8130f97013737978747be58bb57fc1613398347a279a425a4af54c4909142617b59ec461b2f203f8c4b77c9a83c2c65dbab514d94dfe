@@ -1,0 +1,737 @@
+// src/create-cli.ts
+import { select } from "@inquirer/prompts";
+
+// src/i18n/messages.ts
+var jaMessages = {
+  stepsCompleted: (total) => `\u2705 ${total} \u30B9\u30C6\u30C3\u30D7\u5B8C\u4E86`,
+  ctrlCToStop: "(Ctrl+C \u3067\u505C\u6B62)",
+  back: "\u25C0 \u623B\u308B",
+  top: "\u23EB TOP\u3078",
+  exit: "\u274C \u7D42\u4E86",
+  errorOccurred: "\n\u26A0 \u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u307E\u3057\u305F\u3002\n",
+  errorReturnToTop: "\n\u26A0 \u30A8\u30E9\u30FC\u304C\u767A\u751F\u3057\u307E\u3057\u305F\u3002TOP\u30E1\u30CB\u30E5\u30FC\u306B\u623B\u308A\u307E\u3059\u3002\n",
+  pressEnterToReturn: "Enter \u3067\u623B\u308B..."
+};
+var enMessages = {
+  stepsCompleted: (total) => `\u2705 ${total} steps completed`,
+  ctrlCToStop: "(Ctrl+C to stop)",
+  back: "\u25C0 Back",
+  top: "\u23EB Top",
+  exit: "\u274C Exit",
+  errorOccurred: "\n\u26A0 An error occurred.\n",
+  errorReturnToTop: "\n\u26A0 An error occurred. Returning to top menu.\n",
+  pressEnterToReturn: "Press Enter to return..."
+};
+var defaultMessages = jaMessages;
+function applyMessageOverrides(base, o) {
+  const stepsTpl = o.stepsCompleted;
+  return {
+    stepsCompleted: stepsTpl ? (total) => stepsTpl.replaceAll("{total}", String(total)) : base.stepsCompleted,
+    ctrlCToStop: o.ctrlCToStop ?? base.ctrlCToStop,
+    back: o.back ?? base.back,
+    top: o.top ?? base.top,
+    exit: o.exit ?? base.exit,
+    errorOccurred: o.errorOccurred ?? base.errorOccurred,
+    errorReturnToTop: o.errorReturnToTop ?? base.errorReturnToTop,
+    pressEnterToReturn: o.pressEnterToReturn ?? base.pressEnterToReturn
+  };
+}
+function resolveMessagesForNavConfig(locale, overrides) {
+  const base = locale === "en" ? enMessages : jaMessages;
+  return overrides ? applyMessageOverrides(base, overrides) : base;
+}
+
+// src/ui/color.ts
+var defaultColorPalette = {
+  blue: "\x1B[38;5;39m",
+  cyan: "\x1B[38;5;45m",
+  orange: "\x1B[38;5;208m",
+  green: "\x1B[38;5;82m",
+  red: "\x1B[38;5;196m",
+  gray: "\x1B[90m",
+  reset: "\x1B[0m"
+};
+var color = defaultColorPalette;
+function mergeColorPalette(partial) {
+  return { ...defaultColorPalette, ...partial };
+}
+
+// src/ui/banner.ts
+import figlet from "figlet";
+var DEFAULT_BANNER = `
++-------------------------------------------------------------------+
+|                                                                   |
+| \u2588\u2588\u2588\u2557   \u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2588\u2557   \u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2557   \u2588\u2588\u2557\u2588\u2588\u2557   \u2588\u2588\u2557 |
+| \u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551 |
+| \u2588\u2588\u2554\u2588\u2588\u2557 \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551\u2588\u2588\u2554\u2588\u2588\u2588\u2588\u2554\u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2554\u2588\u2588\u2557 \u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551 |
+| \u2588\u2588\u2551\u255A\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u255A\u2588\u2588\u2557 \u2588\u2588\u2554\u255D\u2588\u2588\u2551\u255A\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255D  \u2588\u2588\u2551\u255A\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551 |
+| \u2588\u2588\u2551 \u255A\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551 \u255A\u2588\u2588\u2588\u2588\u2554\u255D \u2588\u2588\u2551 \u255A\u2550\u255D \u2588\u2588\u2551\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2551 \u255A\u2588\u2588\u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D |
+| \u255A\u2550\u255D  \u255A\u2550\u2550\u2550\u255D\u255A\u2550\u255D  \u255A\u2550\u255D  \u255A\u2550\u2550\u2550\u255D  \u255A\u2550\u255D     \u255A\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u255D  \u255A\u2550\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D  |
+|                                            powered by @kd1-labs   |
++-------------------------------------------------------------------+
+`;
+function printBanner(banner, bannerColor, colorPalette = defaultColorPalette) {
+  if (typeof banner === "function") {
+    banner();
+    return;
+  }
+  let text = DEFAULT_BANNER;
+  if (typeof banner === "string") {
+    text = figlet.textSync(banner);
+  } else if (banner?.type === "text") {
+    text = figlet.textSync(banner.text);
+  } else if (banner?.type === "file") {
+    text = banner.content ?? DEFAULT_BANNER;
+  }
+  const colorCode = bannerColor ?? colorPalette.blue;
+  console.log(`${colorCode}${text}${colorPalette.reset}`);
+}
+
+// src/ui/banner-renderer.ts
+function createDefaultBannerRenderer(colorPalette = defaultColorPalette) {
+  return {
+    print(banner, bannerColor) {
+      printBanner(banner, bannerColor, colorPalette);
+    }
+  };
+}
+var defaultBannerRenderer = createDefaultBannerRenderer();
+
+// src/ui/color-resolve.ts
+var PRESET_KEYS = [
+  "blue",
+  "cyan",
+  "orange",
+  "green",
+  "red",
+  "gray",
+  "reset"
+];
+function presetKeyFromString(value) {
+  const lower = value.toLowerCase();
+  for (const k of PRESET_KEYS) {
+    if (lower === k) {
+      return k;
+    }
+  }
+  return void 0;
+}
+function resolveColorToken(value, palette) {
+  const key = presetKeyFromString(value);
+  if (key !== void 0) {
+    return palette[key];
+  }
+  return value;
+}
+function resolvePartialColors(partial) {
+  if (!partial) {
+    return void 0;
+  }
+  const out = {};
+  for (const key of PRESET_KEYS) {
+    const v = partial[key];
+    if (v !== void 0) {
+      out[key] = resolveColorToken(v, defaultColorPalette);
+    }
+  }
+  return out;
+}
+function resolveBannerColorToken(token, palette) {
+  if (token === void 0) {
+    return void 0;
+  }
+  return resolveColorToken(token, palette);
+}
+
+// src/ui/theme.ts
+function createThemeFromPalette(palette) {
+  return {
+    palette: {
+      info: palette.cyan,
+      success: palette.green,
+      warn: palette.orange,
+      error: palette.red,
+      muted: palette.gray,
+      reset: palette.reset
+    },
+    formatBreadcrumb(segments) {
+      return segments.join(" > ");
+    }
+  };
+}
+var defaultTheme = createThemeFromPalette(
+  defaultColorPalette
+);
+function createThemeFromPartialColors(partial) {
+  return createThemeFromPalette(mergeColorPalette(partial));
+}
+
+// src/ui/logger.ts
+function createLogger(theme) {
+  const { palette } = theme;
+  return {
+    info: (msg) => console.log(`${palette.info}${msg}${palette.reset}`),
+    success: (msg) => console.log(`${palette.success}${msg}${palette.reset}`),
+    warn: (msg) => console.log(`${palette.warn}${msg}${palette.reset}`),
+    error: (msg) => console.log(`${palette.error}${msg}${palette.reset}`)
+  };
+}
+var log = createLogger(defaultTheme);
+
+// src/ui/prompt-config.ts
+var SELECT_PAGE_SIZE = 10;
+var SELECT_THEME = {
+  icon: { cursor: "\u25B6" },
+  style: {
+    highlight: (text) => `\x1B[1;7m ${text} \x1B[0m`
+  }
+};
+
+// src/ui/screen.ts
+var DEFAULT_BORDER = "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500";
+var DEFAULT_TITLE_TEMPLATE = "\u3010{title}\u3011";
+function showScreen(title = "Main Menu", options = {}) {
+  console.clear();
+  const renderer = options.bannerRenderer ?? defaultBannerRenderer;
+  renderer.print(options.banner, options.bannerColor);
+  const border = options.screen?.border !== void 0 ? options.screen.border : DEFAULT_BORDER;
+  const titleTemplate = options.screen?.titleTemplate ?? DEFAULT_TITLE_TEMPLATE;
+  const titleLine = titleTemplate.replaceAll("{title}", title);
+  if (border.length > 0) {
+    console.log(border);
+  }
+  console.log(titleLine);
+  if (border.length > 0) {
+    console.log(border);
+  }
+  if (options.breadcrumb) {
+    console.log(options.breadcrumb);
+  }
+  console.log("");
+}
+
+// src/create-cli.ts
+function buildChoices(menus, messages) {
+  const menuChoices = menus.map((m) => ({
+    name: m.name,
+    value: m.value,
+    description: m.description
+  }));
+  return [
+    ...menuChoices,
+    { name: messages.exit, value: "__exit__" }
+  ];
+}
+async function createCli(config) {
+  const {
+    menus,
+    title = "Main Menu",
+    banner,
+    bannerColor,
+    screen,
+    colors,
+    theme: themeOption,
+    bannerRenderer: bannerRendererOption,
+    messages = defaultMessages
+  } = config;
+  const resolvedColors = resolvePartialColors(colors);
+  const mergedPalette = themeOption ? defaultColorPalette : mergeColorPalette(resolvedColors);
+  const theme = themeOption ?? createThemeFromPartialColors(resolvedColors);
+  const bannerRenderer = bannerRendererOption ?? createDefaultBannerRenderer(mergedPalette);
+  const log2 = createLogger(theme);
+  const choices = buildChoices(menus, messages);
+  const handlerMap = /* @__PURE__ */ new Map();
+  for (const m of menus) {
+    handlerMap.set(m.value, m.handler);
+  }
+  const screenOptions = {
+    banner,
+    bannerColor: resolveBannerColorToken(bannerColor, mergedPalette),
+    bannerRenderer,
+    screen
+  };
+  showScreen(title, screenOptions);
+  while (true) {
+    const choice = await select({
+      message: "Select an action\n",
+      choices,
+      loop: false,
+      pageSize: SELECT_PAGE_SIZE,
+      theme: SELECT_THEME
+    }).catch(() => "__interrupted__");
+    if (choice === "__interrupted__") {
+      log2.warn("\nBye! \u{1F44B}");
+      process.exit(0);
+    }
+    if (choice === "__exit__") {
+      log2.info("\nBye! \u{1F44B}\n");
+      process.exit(0);
+    }
+    const handler = handlerMap.get(choice);
+    if (handler) {
+      try {
+        await handler();
+      } catch {
+        log2.error(messages.errorReturnToTop);
+      }
+    }
+    showScreen(title, screenOptions);
+  }
+}
+
+// src/create-cli-from-config.ts
+import { confirm, select as select2 } from "@inquirer/prompts";
+import { readFile } from "fs/promises";
+import { dirname, isAbsolute, resolve } from "path";
+
+// src/config/nav-menu-schema.ts
+import { z } from "zod";
+var commandSchema = z.discriminatedUnion("mode", [
+  z.object({
+    type: z.literal("command"),
+    mode: z.literal("once"),
+    cmd: z.string(),
+    label: z.string().optional()
+  }),
+  z.object({
+    type: z.literal("command"),
+    mode: z.literal("sequential"),
+    steps: z.array(
+      z.object({
+        label: z.string(),
+        cmd: z.string()
+      })
+    )
+  }),
+  z.object({
+    type: z.literal("command"),
+    mode: z.literal("foreground"),
+    cmd: z.string(),
+    label: z.string().optional()
+  })
+]);
+var actionSchema = z.lazy(
+  () => z.union([
+    commandSchema,
+    z.object({
+      type: z.literal("menu"),
+      menuId: z.string()
+    }),
+    z.object({
+      type: z.literal("table"),
+      headers: z.array(z.string()),
+      rows: z.array(z.array(z.string()))
+    }),
+    z.object({
+      type: z.literal("confirm"),
+      message: z.string(),
+      onYes: actionSchema,
+      onNo: actionSchema.optional()
+    })
+  ])
+);
+var menuItemSchema = z.lazy(
+  () => z.object({
+    label: z.string(),
+    description: z.string().optional(),
+    action: actionSchema
+  })
+);
+var menuNodeSchema = z.object({
+  label: z.string(),
+  description: z.string().optional(),
+  items: z.array(menuItemSchema)
+});
+var navScreenSchema = z.object({
+  border: z.string().optional(),
+  titleTemplate: z.string().optional()
+});
+var navColorsSchema = z.object({
+  blue: z.string().optional(),
+  cyan: z.string().optional(),
+  orange: z.string().optional(),
+  green: z.string().optional(),
+  red: z.string().optional(),
+  gray: z.string().optional(),
+  reset: z.string().optional()
+});
+var messageOverridesSchema = z.object({
+  stepsCompleted: z.string().optional(),
+  ctrlCToStop: z.string().optional(),
+  back: z.string().optional(),
+  top: z.string().optional(),
+  exit: z.string().optional(),
+  errorOccurred: z.string().optional(),
+  errorReturnToTop: z.string().optional(),
+  pressEnterToReturn: z.string().optional()
+});
+var navMenuConfigSchema = z.object({
+  rootMenuId: z.string(),
+  menus: z.record(z.string(), menuNodeSchema),
+  title: z.string().optional(),
+  screen: navScreenSchema.optional(),
+  colors: navColorsSchema.optional(),
+  locale: z.enum(["ja", "en"]).optional(),
+  messageOverrides: messageOverridesSchema.optional(),
+  banner: z.union([
+    z.string(),
+    z.object({
+      type: z.literal("text"),
+      text: z.string()
+    }),
+    z.object({
+      type: z.literal("file"),
+      path: z.string()
+    })
+  ]).optional(),
+  bannerColor: z.string().optional(),
+  labels: z.object({
+    back: z.string().optional(),
+    top: z.string().optional(),
+    exit: z.string().optional()
+  }).optional()
+});
+function parseNavMenuConfigUnknown(data) {
+  return navMenuConfigSchema.parse(data);
+}
+function parseNavMenuConfigJson(json) {
+  const data = JSON.parse(json);
+  return parseNavMenuConfigUnknown(data);
+}
+function walkAction(action, visit) {
+  visit(action);
+  if (action.type === "confirm") {
+    walkAction(action.onYes, visit);
+    if (action.onNo) walkAction(action.onNo, visit);
+  }
+}
+function assertNavMenuRefs(config) {
+  const ids = new Set(Object.keys(config.menus));
+  if (!ids.has(config.rootMenuId)) {
+    throw new Error(
+      `navmenu: rootMenuId "${config.rootMenuId}" is not defined in menus`
+    );
+  }
+  const checkMenuId = (a) => {
+    if (a.type === "menu" && !ids.has(a.menuId)) {
+      throw new Error(`navmenu: unknown menuId "${a.menuId}"`);
+    }
+  };
+  for (const menu of Object.values(config.menus)) {
+    for (const item of menu.items) {
+      walkAction(item.action, checkMenuId);
+    }
+  }
+}
+
+// src/runner.ts
+import { execSync, spawn } from "child_process";
+var defaultOpts = {
+  cwd: process.cwd(),
+  stdio: "inherit",
+  env: { ...process.env, FORCE_COLOR: "1" }
+};
+function runStep(step, opts) {
+  console.log(`
+\u25B6 ${step.label}`);
+  console.log(`  $ ${step.cmd}`);
+  execSync(step.cmd, { ...defaultOpts, ...opts });
+}
+function runSequential(steps, opts) {
+  const messages = opts?.messages ?? defaultMessages;
+  const total = steps.length;
+  for (let i = 0; i < total; i++) {
+    const step = steps[i];
+    console.log(`
+\u25B6 [${i + 1}/${total}] ${step.label}`);
+    console.log(`  $ ${step.cmd}`);
+    execSync(step.cmd, { ...defaultOpts, ...opts });
+  }
+  console.log(`
+${messages.stepsCompleted(total)}`);
+}
+function runForeground(step, options) {
+  const messages = options?.messages ?? defaultMessages;
+  return new Promise((resolve2) => {
+    console.log(`
+\u25B6 ${step.label}`);
+    console.log(`  $ ${step.cmd}`);
+    console.log(`  ${messages.ctrlCToStop}
+`);
+    const child = spawn(step.cmd, {
+      cwd: process.cwd(),
+      stdio: "inherit",
+      env: { ...process.env, FORCE_COLOR: "1" },
+      shell: true
+    });
+    const onSignal = () => {
+      child.kill("SIGTERM");
+    };
+    process.on("SIGINT", onSignal);
+    process.on("SIGTERM", onSignal);
+    child.on("close", (code) => {
+      process.off("SIGINT", onSignal);
+      process.off("SIGTERM", onSignal);
+      resolve2(code);
+    });
+  });
+}
+
+// src/ui/pause.ts
+function waitForEnter(message = defaultMessages.pressEnterToReturn, style) {
+  const muted = style?.muted ?? defaultColorPalette.gray;
+  const reset = style?.reset ?? defaultColorPalette.reset;
+  return new Promise((resolve2) => {
+    process.stdout.write(`${muted}  ${message}${reset}`);
+    const onData = () => {
+      process.stdin.removeListener("data", onData);
+      process.stdin.setRawMode?.(false);
+      process.stdin.pause();
+      resolve2();
+    };
+    process.stdin.setRawMode?.(true);
+    process.stdin.resume();
+    process.stdin.once("data", onData);
+  });
+}
+
+// src/ui/table.ts
+import Table from "cli-table3";
+function printTable(headers, rows) {
+  const table = new Table({ head: headers });
+  for (const r of rows) table.push(r);
+  console.log(table.toString());
+}
+
+// src/create-cli-from-config.ts
+var CHOICE_BACK = "__back__";
+var CHOICE_TOP = "__top__";
+var CHOICE_EXIT = "__exit__";
+function buildBreadcrumb(stack, config, theme) {
+  const segments = stack.map((id) => config.menus[id]?.label ?? id);
+  return theme.formatBreadcrumb(segments);
+}
+async function dispatchAction(action, stack, _config, ctx) {
+  switch (action.type) {
+    case "menu":
+      stack.push(action.menuId);
+      return;
+    case "command": {
+      if (action.mode === "once") {
+        runStep({ label: action.label ?? action.cmd, cmd: action.cmd });
+      } else if (action.mode === "sequential") {
+        runSequential(action.steps, { messages: ctx.messages });
+      } else {
+        await runForeground(
+          {
+            label: action.label ?? action.cmd,
+            cmd: action.cmd
+          },
+          { messages: ctx.messages }
+        );
+      }
+      await waitForEnter(ctx.messages.pressEnterToReturn, ctx.pauseStyle);
+      return;
+    }
+    case "table":
+      printTable(action.headers, action.rows);
+      await waitForEnter(ctx.messages.pressEnterToReturn, ctx.pauseStyle);
+      return;
+    case "confirm": {
+      const ok = await confirm({ message: action.message });
+      const next = ok ? action.onYes : action.onNo;
+      if (next) {
+        await dispatchAction(next, stack, _config, ctx);
+      }
+      return;
+    }
+  }
+}
+async function createCliFromNavConfig(config, options = {}) {
+  assertNavMenuRefs(config);
+  const resolvedColors = resolvePartialColors(config.colors);
+  const mergedPalette = options.theme ? defaultColorPalette : mergeColorPalette(resolvedColors);
+  const theme = options.theme ?? createThemeFromPalette(mergeColorPalette(resolvedColors));
+  const bannerRenderer = options.bannerRenderer ?? createDefaultBannerRenderer(mergedPalette);
+  const messages = options.messages ?? resolveMessagesForNavConfig(config.locale, config.messageOverrides);
+  const log2 = createLogger(theme);
+  const pauseStyle = {
+    muted: theme.palette.muted ?? mergedPalette.gray,
+    reset: theme.palette.reset
+  };
+  const ctx = { messages, pauseStyle };
+  const labels = {
+    back: config.labels?.back ?? messages.back,
+    top: config.labels?.top ?? messages.top,
+    exit: config.labels?.exit ?? messages.exit
+  };
+  const stack = [config.rootMenuId];
+  const screenBase = {
+    banner: options.resolvedBanner ?? config.banner,
+    bannerColor: resolveBannerColorToken(config.bannerColor, mergedPalette),
+    bannerRenderer,
+    screen: config.screen
+  };
+  while (true) {
+    const currentId = stack[stack.length - 1] ?? config.rootMenuId;
+    const menu = config.menus[currentId];
+    if (!menu) {
+      log2.error(`Missing menu: ${currentId}`);
+      stack.length = 0;
+      stack.push(config.rootMenuId);
+      continue;
+    }
+    const depth = stack.length;
+    const breadcrumb = theme.palette.info + buildBreadcrumb(stack, config, theme) + theme.palette.reset;
+    const screenTitle = config.title ? `${config.title} \u2014 ${menu.label}` : menu.label;
+    showScreen(screenTitle, {
+      ...screenBase,
+      breadcrumb
+    });
+    const choices = menu.items.map((item, i) => ({
+      name: item.label,
+      value: `u:${String(i)}`,
+      description: item.description
+    }));
+    if (depth > 1) {
+      choices.push({ name: labels.back, value: CHOICE_BACK });
+      choices.push({ name: labels.top, value: CHOICE_TOP });
+    }
+    choices.push({ name: labels.exit, value: CHOICE_EXIT });
+    const choice = await select2({
+      message: "Select an action\n",
+      choices,
+      loop: false,
+      pageSize: SELECT_PAGE_SIZE,
+      theme: SELECT_THEME
+    }).catch(() => "__interrupted__");
+    if (choice === "__interrupted__") {
+      log2.warn("\nBye! \u{1F44B}");
+      process.exit(0);
+    }
+    if (choice === CHOICE_EXIT) {
+      log2.info("\nBye! \u{1F44B}\n");
+      process.exit(0);
+    }
+    if (choice === CHOICE_BACK) {
+      if (stack.length > 1) {
+        stack.pop();
+      }
+      continue;
+    }
+    if (choice === CHOICE_TOP) {
+      stack.length = 0;
+      stack.push(config.rootMenuId);
+      continue;
+    }
+    if (choice.startsWith("u:")) {
+      const idx = Number(choice.slice(2));
+      const item = menu.items[idx];
+      if (item) {
+        try {
+          await dispatchAction(item.action, stack, config, ctx);
+        } catch {
+          log2.error(messages.errorOccurred);
+          await waitForEnter(messages.pressEnterToReturn, pauseStyle);
+        }
+      }
+    }
+  }
+}
+async function createCliFromConfigFile(filePath, options) {
+  const raw = await readFile(filePath, "utf8");
+  const config = parseNavMenuConfigJson(raw);
+  const configDir = dirname(resolve(filePath));
+  const resolvedBanner = await resolveBannerConfig(config.banner, configDir);
+  await createCliFromNavConfig(config, { ...options, resolvedBanner });
+}
+async function resolveBannerConfig(banner, configDir) {
+  if (!banner || typeof banner === "string" || banner.type === "text") {
+    return banner;
+  }
+  const resolvedPath = isAbsolute(banner.path) ? banner.path : resolve(configDir, banner.path);
+  const content = await readFile(resolvedPath, "utf8");
+  return {
+    type: "file",
+    path: resolvedPath,
+    content
+  };
+}
+
+// src/services/command.service.ts
+import { spawn as spawn2 } from "child_process";
+async function runCommand(command, args, cwdOrOpts) {
+  const opts = typeof cwdOrOpts === "string" ? { cwd: cwdOrOpts } : cwdOrOpts ?? {};
+  return new Promise((resolve2, reject) => {
+    const child = spawn2(command, args, {
+      cwd: opts.cwd,
+      env: opts.env,
+      stdio: "pipe",
+      shell: false
+    });
+    const chunks = { out: [], err: [] };
+    child.stdout.on("data", (data) => chunks.out.push(data));
+    child.stderr.on("data", (data) => chunks.err.push(data));
+    child.on("error", reject);
+    child.on("close", (code) => {
+      const stdout = Buffer.concat(chunks.out).toString().trim();
+      const stderr = Buffer.concat(chunks.err).toString().trim();
+      if (code === 0) {
+        resolve2({ stdout, stderr });
+        return;
+      }
+      const detail = stderr || stdout;
+      const msg = detail ? `${command} ${args.join(" ")} failed (code ${code}):
+${detail}` : `${command} ${args.join(" ")} failed with code ${code}`;
+      reject(new Error(msg));
+    });
+  });
+}
+
+// src/ui/spinner.ts
+import ora from "ora";
+function createSpinner(text) {
+  return ora({
+    text,
+    spinner: "dots"
+  }).start();
+}
+export {
+  SELECT_PAGE_SIZE,
+  SELECT_THEME,
+  assertNavMenuRefs,
+  color,
+  createCli,
+  createCliFromConfigFile,
+  createCliFromNavConfig,
+  createDefaultBannerRenderer,
+  createLogger,
+  createSpinner,
+  createThemeFromPalette,
+  createThemeFromPartialColors,
+  defaultBannerRenderer,
+  defaultColorPalette,
+  defaultMessages,
+  defaultTheme,
+  enMessages,
+  jaMessages,
+  log,
+  mergeColorPalette,
+  messageOverridesSchema,
+  navMenuConfigSchema,
+  parseNavMenuConfigJson,
+  parseNavMenuConfigUnknown,
+  printBanner,
+  printTable,
+  resolveBannerColorToken,
+  resolveColorToken,
+  resolveMessagesForNavConfig,
+  resolvePartialColors,
+  runCommand,
+  runForeground,
+  runSequential,
+  runStep,
+  showScreen,
+  waitForEnter
+};
+//# sourceMappingURL=index.js.map

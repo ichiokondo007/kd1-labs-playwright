@@ -10,8 +10,11 @@ services:
     command: >
       bash -c "
         corepack enable &&
-        pnpm install --no-frozen-lockfile &&
-        pnpm --filter @kd1-labs/e2e scheduler
+        exec su -s /bin/bash $(id -un ${UID:-1000}) -c '
+          cd /workspace &&
+          pnpm install --no-frozen-lockfile &&
+          pnpm --filter @kd1-labs/e2e scheduler
+        '
       "
     env_file:
       - path: ./apps/e2e/.env

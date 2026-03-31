@@ -1,0 +1,277 @@
+{
+  "rootMenuId": "top",
+  "title": "TEST MENU",
+  "bannerColor": "orange",
+  "banner": {
+    "type": "file",
+    "path": "./banner.txt"
+  },
+  "screen": {
+    "border": "===============================================================================",
+    "titleTemplate": ">> {title}"
+  },
+  "locale": "en",
+  "menus": {
+    "top": {
+      "label": "TOP",
+      "items": [
+        {
+          "label": "⚙  SET UP",
+          "description": "Docker UP 前にグループ設定ファイルを配置",
+          "action": {
+            "type": "menu",
+            "menuId": "setup-menu"
+          }
+        },
+        {
+          "label": "🐳 Docker Menu",
+          "description": "コンテナの起動・停止・ログ確認",
+          "action": {
+            "type": "menu",
+            "menuId": "docker-menu"
+          }
+        },
+        {
+          "label": "💯 Manual TEST RUN",
+          "description": "個別テストの手動実行",
+          "action": {
+            "type": "menu",
+            "menuId": "manual-test-menu"
+          }
+        }
+      ]
+    },
+    "setup-menu": {
+      "label": "⚙  SET UP",
+      "items": [
+        {
+          "label": " Agroup",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "rm -f apps/e2e/src/single-user.*.json && cp apps/e2e/work/single-user.A* apps/e2e/src/. && cp apps/e2e/work/cron-schedule.Agroup.json apps/e2e/cron-schedule.json && echo '👌 Agroup setup complete.'",
+            "label": "Agroup setup"
+          }
+        },
+        {
+          "label": " Bgroup",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "rm -f apps/e2e/src/single-user.*.json && cp apps/e2e/work/single-user.B* apps/e2e/src/. && cp apps/e2e/work/cron-schedule.Bgroup.json apps/e2e/cron-schedule.json && echo '👌 Bgroup setup complete.'",
+            "label": "Bgroup setup"
+          }
+        },
+        {
+          "label": " Cgroup",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "rm -f apps/e2e/src/single-user.*.json && cp apps/e2e/work/single-user.C* apps/e2e/src/. && cp apps/e2e/work/cron-schedule.Cgroup.json apps/e2e/cron-schedule.json && echo '👌 Cgroup setup complete.'",
+            "label": "Cgroup setup"
+          }
+        },
+        {
+          "label": " Dgroup",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "rm -f apps/e2e/src/single-user.*.json && cp apps/e2e/work/single-user.D* apps/e2e/src/. && cp apps/e2e/work/cron-schedule.Dgroup.json apps/e2e/cron-schedule.json && echo '👌 Dgroup setup complete.'",
+            "label": "Dgroup setup"
+          }
+        },
+        {
+          "label": " Egroup",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "rm -f apps/e2e/src/single-user.*.json && cp apps/e2e/work/single-user.E* apps/e2e/src/. && cp apps/e2e/work/cron-schedule.Egroup.json apps/e2e/cron-schedule.json && echo '👌 Egroup setup complete.'",
+            "label": "Egroup setup"
+          }
+        },
+        {
+          "label": " Fgroup",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "rm -f apps/e2e/src/single-user.*.json && cp apps/e2e/work/single-user.F* apps/e2e/src/. && cp apps/e2e/work/cron-schedule.Fgroup.json apps/e2e/cron-schedule.json && echo '👌 Fgroup setup complete.'",
+            "label": "Fgroup setup"
+          }
+        }
+      ]
+    },
+    "docker-menu": {
+      "label": "🐳 Docker Menu",
+      "items": [
+        {
+          "label": "Playwright runner UP",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose up -d",
+            "label": "docker compose up"
+          }
+        },
+        {
+          "label": "Down",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose down",
+            "label": "docker compose down"
+          }
+        },
+        {
+          "label": "Docker ps",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose ps",
+            "label": "docker compose ps"
+          }
+        },
+        {
+          "label": "Docker log",
+          "action": {
+            "type": "command",
+            "mode": "foreground",
+            "cmd": "docker compose logs -f",
+            "label": "docker compose logs"
+          }
+        },
+        {
+          "label": "All delete",
+          "action": {
+            "type": "confirm",
+            "message": "コンテナ・ボリュームを全て削除しますか？",
+            "onYes": {
+              "type": "command",
+              "mode": "once",
+              "cmd": "docker compose down -v --rmi all && echo 'All deleted.'",
+              "label": "docker compose down -v --rmi all"
+            },
+            "onNo": {
+              "type": "command",
+              "mode": "once",
+              "cmd": "echo 'キャンセルしました'",
+              "label": "Cancel"
+            }
+          }
+        }
+      ]
+    },
+    "manual-test-menu": {
+      "label": "Manual TEST RUN",
+      "items": [
+        {
+          "label": "Agroup001 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Agroup001.json pnpm test'",
+            "label": "Agroup001"
+          }
+        },
+        {
+          "label": "Agroup002 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Agroup002.json pnpm test'",
+            "label": "Agroup002"
+          }
+        },
+        {
+          "label": "Bgroup001 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Bgroup001.json pnpm test'",
+            "label": "Bgroup001"
+          }
+        },
+        {
+          "label": "Bgroup002 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Bgroup002.json pnpm test'",
+            "label": "Bgroup002"
+          }
+        },
+        {
+          "label": "Cgroup001 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Cgroup001.json pnpm test'",
+            "label": "Cgroup001"
+          }
+        },
+        {
+          "label": "Cgroup002 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Cgroup002.json pnpm test'",
+            "label": "Cgroup002"
+          }
+        },
+        {
+          "label": "Dgroup001 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Dgroup001.json pnpm test'",
+            "label": "Dgroup001"
+          }
+        },
+        {
+          "label": "Dgroup002 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Dgroup002.json pnpm test'",
+            "label": "Dgroup002"
+          }
+        },
+        {
+          "label": "Egroup001 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Egroup001.json pnpm test'",
+            "label": "Egroup001"
+          }
+        },
+        {
+          "label": "Egroup002 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Egroup002.json pnpm test'",
+            "label": "Egroup002"
+          }
+        },
+        {
+          "label": "Fgroup001 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Fgroup001.json pnpm test'",
+            "label": "Fgroup001"
+          }
+        },
+        {
+          "label": "Fgroup002 run",
+          "action": {
+            "type": "command",
+            "mode": "once",
+            "cmd": "docker compose exec playwright bash -c 'TEST_BASE=single-user.Fgroup002.json pnpm test'",
+            "label": "Fgroup002"
+          }
+        }
+      ]
+    }
+  }
+}
