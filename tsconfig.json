@@ -9,5 +9,9 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.json", "playwright.config.ts"]
+  "references": [
+    { "path": "packages/playwright-kit" },
+    { "path": "apps/e2e" }
+  ],
+  "include": []
 }

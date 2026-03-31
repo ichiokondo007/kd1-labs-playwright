@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Fgroup001 (毎時00分)",
+    "schedule": "5 * * * *",
+    "command": "TEST_BASE=single-user.Fgroup001.json pnpm test",
+    "timezone": "Asia/Tokyo"
+  },
+  {
+    "name": "Fgroup002 (毎時15分)",
+    "schedule": "20 * * * *",
+    "command": "TEST_BASE=single-user.Fgroup002.json pnpm test",
+    "timezone": "Asia/Tokyo"
+  },
+  {
+    "name": "Fgroup001 (毎時30分)",
+    "schedule": "35 * * * *",
+    "command": "TEST_BASE=single-user.Fgroup001.json pnpm test",
+    "timezone": "Asia/Tokyo"
+  },
+  {
+    "name": "Fgroup002 (毎時45分)",
+    "schedule": "50 * * * *",
+    "command": "TEST_BASE=single-user.Fgroup002.json pnpm test",
+    "timezone": "Asia/Tokyo"
+  }
+]

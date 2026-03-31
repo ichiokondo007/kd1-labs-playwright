@@ -1,0 +1,25 @@
+{
+  "name": "@kd1-labs/e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Product E2E tests",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "scheduler": "tsx src/scheduler.ts"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@kd1-labs/playwright-kit": "workspace:*",
+    "@playwright/test": "^1.58.2",
+    "@types/node": "^22.19.15",
+    "@types/node-cron": "^3.0.11",
+    "dotenv": "^17.3.1"
+  }
+}

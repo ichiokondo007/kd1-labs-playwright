@@ -1,0 +1,37 @@
+{
+  "runId": "2026-03-25T03:40:12Z",
+  "project": "chromium",
+  "specFile": "order.cross-user-workflow-test.spec.ts",
+  "testType": "cross-user-workflow-test",
+
+  "feature": "作業登録",
+  "scenario": "作業登録ワークフロー",
+
+  "tests": [
+    {
+      "testId": "order-001",
+      "title": "作業時間が登録されること",
+      "step": "作業時間の登録確認",
+      "status": "failed",
+      "durationMs": 1240,
+      "errorMessage": "Expected value to be '2h' but got '0h'",
+      "annotations": [
+        { "type": "feature", "description": "作業登録" },
+        { "type": "step", "description": "作業時間の登録確認" },
+        { "type": "test-type", "description": "cross-user-workflow-test" }
+      ],
+      "attachments": [
+        {
+          "name": "screenshot",
+          "type": "image/png",
+          "path": "evidence/order-001/screenshot.png"
+        },
+        {
+          "name": "trace",
+          "type": "application/zip",
+          "path": "evidence/order-001/trace.zip"
+        }
+      ]
+    }
+  ]
+}

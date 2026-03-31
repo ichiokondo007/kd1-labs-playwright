@@ -1,22 +1,21 @@
 {
   "name": "kd1-labs-playwright",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Monorepo for E2E test framework and product tests",
   "scripts": {
-    "test": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed"
+    "test:e2e": "pnpm --filter @kd1-labs/e2e test",
+    "test:e2e:ui": "pnpm --filter @kd1-labs/e2e test:ui",
+    "test:e2e:headed": "pnpm --filter @kd1-labs/e2e test:headed",
+    "test:e2e:list": "pnpm --filter @kd1-labs/e2e exec playwright test --list",
+    "typecheck": "tsc --build",
+    "scheduler": "pnpm --filter @kd1-labs/e2e scheduler"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
-    "@kd1-labs/devtool-cli": "github:ichiokondo007/devtool-cli",
-    "@playwright/test": "^1.58.2",
-    "@types/node": "^22.19.15",
-    "allure-playwright": "^3.6.0",
-    "dotenv": "^17.3.1"
+    "typescript": "^5.8.2"
   }
 }

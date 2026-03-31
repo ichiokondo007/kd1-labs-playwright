@@ -1,0 +1,225 @@
+{
+  "_purpose": "RDT 同時ログイン・メモリ確認用。複数ユーザーが並列で同一キャンバスにログインし usecaseを追加する。同時ログイン時の負荷を想定し、全 testcase で login.timeoutMs を多めに設定している。",
+  "testcases": [
+    {
+      "testName": "Egroup002-e1",
+      "login": {
+        "username": "e1",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d3f53-13b1-742e-a45e-86ce2f6785e2"
+          }
+        ],
+        "description": "canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecases": [
+        {
+          "usecase-id": "svg-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし svg(track)を5つ作成する",
+          "params": {
+            "x": 100,
+            "y": 10
+          }
+        },
+        {
+          "usecase-id": "circle-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを5つ作成する",
+          "params": {
+            "x": 200,
+            "y": 10
+          }
+        },
+        {
+          "usecase-id": "rect-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを5つ作成する",
+          "params": {
+            "x": 300,
+            "y": 10
+          }
+        }
+      ]
+    },
+    {
+      "testName": "Egroup002-e2",
+      "login": {
+        "username": "e2",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d3f53-13b1-742e-a45e-86ce2f6785e2"
+          }
+        ],
+        "description": "canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecases": [
+        {
+          "usecase-id": "rect-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを5つ作成する",
+          "params": {
+            "x": 400,
+            "y": 10
+          }
+        },
+        {
+          "usecase-id": "circle-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを5つ作成する",
+          "params": {
+            "x": 500,
+            "y": 10
+          }
+        },
+        {
+          "usecase-id": "svg-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし svg(track)を5つ作成する",
+          "params": {
+            "x": 600,
+            "y": 10
+          }
+        }
+      ]
+    },
+    {
+      "testName": "Egroup002-e3",
+      "login": {
+        "username": "e3",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d3f53-13b1-742e-a45e-86ce2f6785e2"
+          }
+        ],
+        "description": "canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecases": [
+        {
+          "usecase-id": "circle-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを5つ作成する",
+          "params": {
+            "x": 700,
+            "y": 10
+          }
+        },
+        {
+          "usecase-id": "svg-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし svg(track)を5つ作成する",
+          "params": {
+            "x": 800,
+            "y": 10
+          }
+        },
+        {
+          "usecase-id": "rect-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを5つ作成する",
+          "params": {
+            "x": 900,
+            "y": 10
+          }
+        }
+      ]
+    },
+    {
+      "testName": "Egroup002-e4",
+      "login": {
+        "username": "e4",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d3f53-13b1-742e-a45e-86ce2f6785e2"
+          }
+        ],
+        "description": "canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecases": [
+        {
+          "usecase-id": "circle-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを5つ作成する",
+          "params": {
+            "x": 100,
+            "y": 250
+          }
+        },
+        {
+          "usecase-id": "svg-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし svg(track)を5つ作成する",
+          "params": {
+            "x": 200,
+            "y": 250
+          }
+        },
+        {
+          "usecase-id": "rect-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを5つ作成する",
+          "params": {
+            "x": 300,
+            "y": 250
+          }
+        }
+      ]
+    },
+    {
+      "testName": "Egroup002-e5",
+      "login": {
+        "username": "e5",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d3f53-13b1-742e-a45e-86ce2f6785e2"
+          }
+        ],
+        "description": "canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecases": [
+        {
+          "usecase-id": "circle-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを5つ作成する",
+          "params": {
+            "x": 400,
+            "y": 350
+          }
+        },
+        {
+          "usecase-id": "svg-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし svg(track)を5つ作成する",
+          "params": {
+            "x": 500,
+            "y": 350
+          }
+        },
+        {
+          "usecase-id": "rect-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし rectを5つ作成する",
+          "params": {
+            "x": 600,
+            "y": 350
+          }
+        }
+      ]
+    }
+  ]
+}

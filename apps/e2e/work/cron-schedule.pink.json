@@ -1,0 +1,8 @@
+[
+  {
+    "name": "全テスト実行",
+    "schedule": "0 9 * * *",
+    "command": "pnpm test",
+    "timezone": "Asia/Tokyo"
+  }
+]

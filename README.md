@@ -1,32 +1,82 @@
-# kd1-labs-playwright
+# playwright custome FW
 
-Playwright による E2E テストプロジェクト。
+Playwright による E2E FW
 
-## CRDT（同時ログイン・メモリ確認）テスト
+## 🚀Puropose
 
-`src/test-base.json` の yjs-circle-add 系テストは **CRDT（Yjs 共同編集）の同時ログイン・メモリ確認用**です。
+### 【基本】
 
-- 複数ユーザーが並列で同一キャンバスにログインし、それぞれ circle を追加する
-- 同時ログイン時の負荷を想定し、全 testcase で `login.timeoutMs` を 20000ms に設定している
-- 並列数は `PLAYWRIGHT_WORKERS` で指定可能（例: `PLAYWRIGHT_WORKERS=5 pnpm test`）
+- 関心事の分離を行う。1テスト内に複数のテスト観点で作成しない。
+- クリーンアーキテクチャのSOLID原則にて、同じシーケンスでテストを作成。
 
-## 実行
+### 【目的】
 
-```bash
-pnpm install
-pnpm test              # ヘッドレス
-pnpm test:headed       # ブラウザ表示
-pnpm test:ui           # UI モード
+1. 保守、維持管理観点でのクリンーンアーキテクチャのSOLID原則に則ったテスト作成を行う事を目的としたFW
+2. テスト結果エビデンス、ログの統一化目的
+3. テスト作成者（AI含む）の統一した各責務単位での実装をルール化。
+4. playwrightの「Test Suite」のルール化
+   - test.spec単位
+   - test()
+   - test.step()
+5. フレイキー対策
+   - Playwrightの全体学習コストなく作成可能なボイラーテンプレート提供。
+   - 評価時のルールを定型化。
+
+---
+
+## 🚀FW提供テスト種類
+
+FWでは以下2種類のtest suiteを用意
+
+| 種別                     | spec ファイル         | JSON プレフィックス | 概要                               |
+| ------------------------ | --------------------- | ------------------- | ---------------------------------- |
+| single-user-test         | `single-user.spec.ts` | `single-user*.json` | 1ユーザー1テストケースの単体テスト |
+| cross-user-workflow-test | (今後追加)            | (今後追加)          | 複数ユーザー連携のテスト           |
+
+### single-user-test
+
+single-user-testは、１ユーザのログイン（１ブラウザ）のみで完結するテストを実行する共通specを提供。
+sing-user-test.jsonがテストとなります。
+
+
+```json
+
+{
+  "_purpose": "5人でCRDT 同時ログイン・メモリ確認用。複数ユーザーが並列で同一キャンバスにログインし circle を追加する。同時ログイン時の負荷を想定し、全 testcase で login.timeoutMs を多めに設定している。",
+  "testcases": [
+    {
+      "testName": "yjs-circle-add-1",
+      "login": {
+        "username": "ichio",
+        "password": "password",
+        "timeoutMs": 20000
+      },
+      "transitions": {
+        "pageurl": "/example/canvas-yjs/:id",
+        "params": [
+          {
+            "id": "019d0c7b-846a-728c-a919-8a00d524179a"
+          }
+        ],
+        "description": "「svg add test」 canvas編集画面に遷移する",
+        "data-testid": "page-canvas-yjs-editor"
+      },
+      "usecase": [
+        {
+          "usecase-id": "svg-add",
+          "description": "yjs collab canvas画面で、任意のcanvasにログインし circleを作成する",
+          "params-description": "circleを作成する座標",
+          "params": {
+            "x": 150,
+            "y": 10
+          }
+        }
+      ]
+    }
+  ]
+}
+
+
+
 ```
 
-環境変数は `.env` を参照（`BASE_URL`, `HEADLESS`, `TIMEOUT`, `ACTION_TIMEOUT`, `PLAYWRIGHT_WORKERS` など）。
-
-## parameter
-
-```bash
-# 全 test-base*.json を並列実行（デフォルト）
-pnpm test
-# 特定の JSON のみ実行
-TEST_BASE=test-base.json pnpm test
-TEST_BASE=test-base.imageAdd.json pnpm test
-```
