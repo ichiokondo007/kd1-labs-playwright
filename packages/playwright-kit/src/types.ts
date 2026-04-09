@@ -30,6 +30,8 @@ export interface TransitionParams {
   pageurl: string;
   /** プレースホルダ（:id 等）を置換するためのパラメータ。先頭要素のキーで pageurl の :key を置換する。 */
   params?: Array<Record<string, string>>;
+  /** data-testid 要素が visible になるまでの待ち（ミリ秒）。未指定・null 時はプロダクト側のデフォルト */
+  checkTimeoutMs?: number | null;
   /** エラーメッセージ用（NG 時に testName:xxx として表示） */
   testName?: string;
   /** エラーメッセージ用（NG 時に loginUser:xxx として表示） */
@@ -50,6 +52,8 @@ export interface TestCase {
     params?: Array<Record<string, string>>;
     description?: string;
     'data-testid': string;
+    /** data-testid 表示確認までの待ち（ミリ秒）。未指定・null 時はプロダクト側のデフォルト */
+    checkTimeoutMs?: number | null;
   };
   usecases: {
     'usecase-id': string;
@@ -62,6 +66,76 @@ export interface TestCase {
 export interface TestBaseSchema {
   _purpose?: string;
   testcases: TestCase[];
+}
+
+/** test 結果の status。Playwright 標準値に揃える */
+export type TestResultStatus = 'passed' | 'failed' | 'timedOut' | 'skipped' | 'interrupted';
+
+/** login / transition / usecase 各ステップ単位の結果 */
+export interface StepResult {
+  name: string;
+  status: 'passed' | 'failed';
+  startTime: string;
+  endTime: string;
+  durationMs: number;
+  error?: {
+    message: string;
+    stack?: string;
+  };
+}
+
+/** usecase 単位の結果（StepResult を拡張） */
+export interface UsecaseResult extends StepResult {
+  'usecase-id': string;
+  params?: Record<string, unknown>;
+}
+
+/** 1 つの testcase（=1 test()）の実行結果 */
+export interface TestCaseResult {
+  testName: string;
+  status: TestResultStatus;
+  startTime: string;
+  endTime: string;
+  durationMs: number;
+  retry: number;
+  login?: StepResult & { username?: string };
+  transition?: StepResult & {
+    pageurl?: string;
+    'data-testid'?: string;
+  };
+  usecases: UsecaseResult[];
+  error?: {
+    message: string;
+    stack?: string;
+  };
+  evidence?: {
+    screenshots?: string[];
+    video?: string;
+    trace?: string;
+  };
+}
+
+/** 1 回の playwright 実行全体の結果 */
+export interface RunResult {
+  schemaVersion: '1.0';
+  runId: string;
+  startTime: string;
+  endTime: string;
+  executionTimeMs: number;
+  environment: {
+    baseURL?: string;
+    browser?: string;
+    headless?: boolean;
+    ci?: boolean;
+  };
+  summary: {
+    total: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+    timedOut: number;
+  };
+  results: TestCaseResult[];
 }
 
 export interface SingleUserTestsOptions {

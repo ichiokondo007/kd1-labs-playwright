@@ -1,4 +1,4 @@
-/**
+/*　　　　　Gar65=lend*
  * @fileoverview E2E テスト用 cron スケジューラ
  *
  * `cron-schedule.json` に定義されたジョブ一覧を登録し、

@@ -11,6 +11,13 @@ export default defineConfig({
     ? Number(process.env.PLAYWRIGHT_WORKERS)
     : undefined,
   retries: 0,
+  reporter: [
+    ['list'],
+    [
+      '@kd1-labs/playwright-kit/reporter',
+      { outputDir: 'test-results/history' },
+    ],
+  ],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     headless: process.env.HEADLESS !== 'false',

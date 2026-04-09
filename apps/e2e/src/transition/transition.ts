@@ -4,6 +4,7 @@ import transitionConfig from '../transition.json';
 
 const config = transitionConfig as TransitionConfigSchema;
 
+/** single-user JSON の transitions.checkTimeoutMs 未指定・null 時の待ち（ミリ秒） */
 const TRANSITION_CHECK_TIMEOUT = 10000;
 
 /**
@@ -42,7 +43,8 @@ export async function transition(
   page: Page,
   params: TransitionParams,
 ): Promise<void> {
-  const { pageurl, params: urlParams, testName = '', loginUser = '' } = params;
+  const { pageurl, params: urlParams, checkTimeoutMs, testName = '', loginUser = '' } = params;
+  const waitMs = checkTimeoutMs ?? TRANSITION_CHECK_TIMEOUT;
 
   const expectedDataTestId = getDataTestIdByPageurl(pageurl);
   const url = buildUrl(pageurl, urlParams);
@@ -53,7 +55,7 @@ export async function transition(
   try {
     await page
       .getByTestId(expectedDataTestId)
-      .waitFor({ state: 'visible', timeout: TRANSITION_CHECK_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: waitMs });
   } catch {
     throw new Error(
       `testName:${testName}, loginUser:${loginUser}, transitioncheck:${expectedDataTestId} NG`,

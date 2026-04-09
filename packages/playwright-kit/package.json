@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./reporter": {
+      "types": "./src/result-reporter.ts",
+      "default": "./src/result-reporter.ts"
     }
   },
   "main": "./src/index.ts",
